@@ -1,23 +1,58 @@
-module Threefry2x32 = struct
+module Rotations = struct
+  type 'a t = {
+    r_0: 'a;
+    r_1: 'a;
+    r_2: 'a;
+    r_3: 'a;
+    r_4: 'a;
+    r_5: 'a;
+    r_6: 'a;
+    r_7: 'a;
+  }
 
-  (* NOTE needs to be unsigned int32 *)
-  let default_rounds = 20
-  let skein_ks_parity32 = 0x1BD11BDA |> Int32.of_int
+  let make r_0 r_1 r_2 r_3 r_4 r_5 r_6 r_7 = {
+    r_0=r_0;
+    r_1=r_1;
+    r_2=r_2;
+    r_3=r_3;
+    r_4=r_4;
+    r_5=r_5;
+    r_6=r_6;
+    r_7=r_7;
+  }
 
-  let r_32x2_0_0 = 13l
-  let r_32x2_1_0 = 15l
-  let r_32x2_2_0 = 26l
-  let r_32x2_3_0 =  6l
-  let r_32x2_4_0 = 17l
-  let r_32x2_5_0 = 29l
-  let r_32x2_6_0 = 16l
-  let r_32x2_7_0 = 24l
+end
 
+module type T = sig
+  type t
+  val max_width : int
+  val default_rounds : int
+  val skein_ks_parity : t
+  val rotations : t Rotations.t
+  val rotL : t -> t -> t
+
+  val add : t -> t -> t
+  val logxor : t -> t -> t
+
+end
+
+module ThreefryInt32 = struct
 
   type t = Int32.t
-  type ctr_t = t array
-  type key_t = t array
-  type ukey_t = t array
+
+  let max_width = 32
+  let default_rounds = 20
+  let skein_ks_parity = 0x1BD11BDA |> Int32.of_int
+
+  let rotations = Rotations.make
+      13l
+      15l
+      26l
+      6l
+      17l
+      29l
+      16l
+      24l
 
   let rotL x n = Int32.(
       let l = logand n 31l |> to_int in
@@ -27,14 +62,28 @@ module Threefry2x32 = struct
       logor left right
     )
 
+  let add = Int32.add
+  let logxor = Int32.logxor
+
+end
+
+module Threefry2x32 (T:T) = struct
+
+  (* NOTE needs to be unsigned int32 *)
+
+  type t = T.t
+  type ctr_t = t array
+  type key_t = t array
+  type ukey_t = t array
+
   let rand_R nrounds (ctr:ctr_t) (key:key_t) =
-    let open Int32 in
-    let _ = if nrounds > 32 then
+    let open T in
+    let _ = if nrounds > max_width then
         failwith @@ Printf.sprintf
           "number rounds must be <= 32"
       else ()
     in
-    let ks2 = skein_ks_parity32 in
+    let ks2 = skein_ks_parity in
     let ks0 = key.(0) in
     let x0 = ref (add ctr.(0) ks0) in
     let ks2 = logxor ks2 ks0 in
@@ -43,73 +92,73 @@ module Threefry2x32 = struct
     let x1 = ref (add ctr.(1) ks1) in
     let ks2 = logxor ks2 ks1 in
 
-    let _ = if nrounds>0 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_0_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>1 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_1_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>2 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_2_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>3 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_3_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>0 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>1 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_1; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>2 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_2; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>3 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_3; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>3 then (
         x0 := add !x0 ks1; x1 := add !x1 ks2;
         x1 := add !x1 1l;
       ) else () in
 
-    let _ = if nrounds>4 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_4_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>5 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_5_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>6 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_6_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>7 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_7_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>4 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_4; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>5 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_5; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>6 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_6; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>7 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_7; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>7 then (
         x0 := add !x0 ks2; x1 := add !x1 ks0;
         x1 := add !x1 2l;
       ) else () in
 
-    let _ = if nrounds>8 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_0_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>9 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_1_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>10 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_2_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>11 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_3_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>8 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>9 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_1; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>10 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_2; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>11 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_3; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>11 then (
         x0 := add !x0 ks0; x1 := add !x1 ks1;
         x1 := add !x1 3l;
       ) else () in
 
-    let _ = if nrounds>12 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_4_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>13 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_5_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>14 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_6_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>15 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_7_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>12 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_4; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>13 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_5; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>14 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_6; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>15 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_7; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>15 then (
         x0 := add !x0 ks1; x1 := add !x1 ks2;
         x1 := add !x1 4l;
       ) else () in
 
-    let _ = if nrounds>16 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_0_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>17 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_1_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>18 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_2_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>19 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_3_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>16 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>17 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_1; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>18 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_2; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>19 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_3; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>19 then (
         x0 := add !x0 ks2; x1 := add !x1 ks0;
         x1 := add !x1 5l;
       ) else () in
 
-    let _ = if nrounds>20 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_4_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>21 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_5_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>22 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_6_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>23 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_7_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>20 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_4; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>21 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_5; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>22 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_6; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>23 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_7; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>23 then (
         x0 := add !x0 ks0; x1 := add !x1 ks1;
         x1 := add !x1 6l;
       ) else () in
 
-    let _ = if nrounds>24 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_0_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>25 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_1_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>26 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_2_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>27 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_3_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>24 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>25 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_1; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>26 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_2; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>27 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_3; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>27 then (
         x0 := add !x0 ks1; x1 := add !x1 ks2;
         x1 := add !x1 7l;
       ) else () in
 
-    let _ = if nrounds>28 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_4_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>29 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_5_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>30 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_6_0; x1 := logxor !x1 !x0;) else () in
-    let _ = if nrounds>31 then (x0 := add !x0 !x1; x1 := rotL !x1 r_32x2_7_0; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>28 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_4; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>29 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_5; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>30 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_6; x1 := logxor !x1 !x0;) else () in
+    let _ = if nrounds>31 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_7; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>31 then (
         x0 := add !x0 ks2; x1 := add !x1 ks0;
         x1 := add !x1 8l;
@@ -118,6 +167,6 @@ module Threefry2x32 = struct
     [|!x0; !x1|]
 
   let rand (ctr:ctr_t) (key:key_t) =
-    rand_R default_rounds ctr key
+    rand_R T.default_rounds ctr key
 
 end
