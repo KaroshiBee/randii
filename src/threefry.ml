@@ -1,6 +1,77 @@
+(*
+ * This ml file is an implementation of the Threefry algorithm as described in
+ *
+ *  "Parallel Random Numbers: As Easy as 1, 2, 3,
+ *  Salmon, Moraes, Dror & Shaw, SC11, Seattle, Washington, USA, 2011, ACM "
+ *
+ * using the implementation at (as of 2021)
+ * https://github.com/DEShawResearch/random123
+ *
+ * The original Threefry header file this is taken from is
+ * random123/include/Random123/threefry.h
+ * of that same project and carries the following notice:
+ *
+ * /*
+ * Copyright 2010-2011, D. E. Shaw Research.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions, and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions, and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ *
+ * * Neither the name of D. E. Shaw Research nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * */
+ *
+ * /** \cond HIDDEN_FROM_DOXYGEN */
+ * /* Significant parts of this file were copied from
+ *    from:
+ *       Skein_FinalRnd/ReferenceImplementation/skein.h
+ *       Skein_FinalRnd/ReferenceImplementation/skein_block.c
+ *
+ *    in http://csrc.nist.gov/groups/ST/hash/sha-3/Round3/documents/Skein_FinalRnd.zip
+ *
+ *    This file has been modified so that it may no longer perform its originally
+ *    intended function.  If you're looking for a Skein or Threefish source code,
+ *    please consult the original file.
+ *
+ *    The original file had the following header:
+ * **************************************************************************
+ * **
+ * ** Interface declarations and internal definitions for Skein hashing.
+ * **
+ * ** Source code author: Doug Whiting, 2008.
+ * **
+ * ** This algorithm and source code is released to the public domain.
+ * **
+ * ***************************************************************************
+ *
+ * */
+ *  *)
+
 module Consts = struct
   type 'a t = {
-    (* rotation amounts *)
+    (* rotation amounts or increments *)
     i_0: 'a;
     i_1: 'a;
     i_2: 'a;
@@ -24,20 +95,21 @@ module Consts = struct
 
 end
 
+(* factor out dependence on Int32 / Int64 *)
 module type T = sig
-  type t
+  type t (* Int32 or Int64 *)
   val default_rounds : int
   val skein_ks_parity : t
   val rotations : t Consts.t
   val indices : t Consts.t
-  val rotL : t -> t -> t
 
+  val rotL : t -> t -> t
   val add : t -> t -> t
   val logxor : t -> t -> t
 
 end
 
-module ThreefryInt32 = struct
+module Int32_T = struct
 
   type t = Int32.t
 
@@ -79,7 +151,7 @@ module ThreefryInt32 = struct
 
 end
 
-module ThreefryInt64 = struct
+module Int64_T = struct
 
   type t = Int64.t
 
@@ -132,14 +204,22 @@ module ThreefryInt64 = struct
 
 end
 
-module Threefry2xW (T:T) = struct
+(*
+ * NOTE needs to be unsigned int32 / int64
+ * Probably need a module for ctr_t and key_t
+ * to stop incorrect constructions *)
 
-  (* NOTE needs to be unsigned int32 / int64 *)
+module type RAND_T = sig
+  type ctr_t
+  type key_t
+  val rand : ctr_t -> key_t -> ctr_t
+end
+
+module Threefry2xW (T:T) : (RAND_T with type ctr_t := T.t array and type key_t := T.t array)= struct
 
   type t = T.t
   type ctr_t = t array
   type key_t = t array
-  type ukey_t = t array
 
   let rand_R nrounds (ctr:ctr_t) (key:key_t) =
     let open T in
@@ -237,5 +317,5 @@ module Threefry2xW (T:T) = struct
 
 end
 
-module Threefry2x32 = Threefry2xW(ThreefryInt32)
-module Threefry2x64 = Threefry2xW(ThreefryInt64)
+module Threefry2x32 = Threefry2xW(Int32_T)
+module Threefry2x64 = Threefry2xW(Int64_T)
