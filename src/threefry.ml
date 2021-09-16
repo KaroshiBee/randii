@@ -1,5 +1,6 @@
 module Rotations = struct
   type 'a t = {
+    (* rotation amounts *)
     r_0: 'a;
     r_1: 'a;
     r_2: 'a;
@@ -8,6 +9,15 @@ module Rotations = struct
     r_5: 'a;
     r_6: 'a;
     r_7: 'a;
+    (* indices to add *)
+    i_1: 'a;
+    i_2: 'a;
+    i_3: 'a;
+    i_4: 'a;
+    i_5: 'a;
+    i_6: 'a;
+    i_7: 'a;
+    i_8: 'a;
   }
 
   let make r_0 r_1 r_2 r_3 r_4 r_5 r_6 r_7 = {
@@ -19,6 +29,14 @@ module Rotations = struct
     r_5=r_5;
     r_6=r_6;
     r_7=r_7;
+    i_1=1l;
+    i_2=2l;
+    i_3=3l;
+    i_4=4l;
+    i_5=5l;
+    i_6=6l;
+    i_7=7l;
+    i_8=8l;
   }
 
 end
@@ -67,9 +85,9 @@ module ThreefryInt32 = struct
 
 end
 
-module Threefry2x32 (T:T) = struct
+module Threefry2xW (T:T) = struct
 
-  (* NOTE needs to be unsigned int32 *)
+  (* NOTE needs to be unsigned int32 / int64 *)
 
   type t = T.t
   type ctr_t = t array
@@ -98,7 +116,7 @@ module Threefry2x32 (T:T) = struct
     let _ = if nrounds>3 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_3; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>3 then (
         x0 := add !x0 ks1; x1 := add !x1 ks2;
-        x1 := add !x1 1l;
+        x1 := add !x1 rotations.i_1;
       ) else () in
 
     let _ = if nrounds>4 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_4; x1 := logxor !x1 !x0;) else () in
@@ -107,7 +125,7 @@ module Threefry2x32 (T:T) = struct
     let _ = if nrounds>7 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_7; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>7 then (
         x0 := add !x0 ks2; x1 := add !x1 ks0;
-        x1 := add !x1 2l;
+        x1 := add !x1 rotations.i_2;
       ) else () in
 
     let _ = if nrounds>8 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_0; x1 := logxor !x1 !x0;) else () in
@@ -116,7 +134,7 @@ module Threefry2x32 (T:T) = struct
     let _ = if nrounds>11 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_3; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>11 then (
         x0 := add !x0 ks0; x1 := add !x1 ks1;
-        x1 := add !x1 3l;
+        x1 := add !x1 rotations.i_3;
       ) else () in
 
     let _ = if nrounds>12 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_4; x1 := logxor !x1 !x0;) else () in
@@ -125,7 +143,7 @@ module Threefry2x32 (T:T) = struct
     let _ = if nrounds>15 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_7; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>15 then (
         x0 := add !x0 ks1; x1 := add !x1 ks2;
-        x1 := add !x1 4l;
+        x1 := add !x1 rotations.i_4;
       ) else () in
 
     let _ = if nrounds>16 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_0; x1 := logxor !x1 !x0;) else () in
@@ -134,7 +152,7 @@ module Threefry2x32 (T:T) = struct
     let _ = if nrounds>19 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_3; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>19 then (
         x0 := add !x0 ks2; x1 := add !x1 ks0;
-        x1 := add !x1 5l;
+        x1 := add !x1 rotations.i_5;
       ) else () in
 
     let _ = if nrounds>20 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_4; x1 := logxor !x1 !x0;) else () in
@@ -143,7 +161,7 @@ module Threefry2x32 (T:T) = struct
     let _ = if nrounds>23 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_7; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>23 then (
         x0 := add !x0 ks0; x1 := add !x1 ks1;
-        x1 := add !x1 6l;
+        x1 := add !x1 rotations.i_6;
       ) else () in
 
     let _ = if nrounds>24 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_0; x1 := logxor !x1 !x0;) else () in
@@ -152,7 +170,7 @@ module Threefry2x32 (T:T) = struct
     let _ = if nrounds>27 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_3; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>27 then (
         x0 := add !x0 ks1; x1 := add !x1 ks2;
-        x1 := add !x1 7l;
+        x1 := add !x1 rotations.i_7;
       ) else () in
 
     let _ = if nrounds>28 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_4; x1 := logxor !x1 !x0;) else () in
@@ -161,7 +179,7 @@ module Threefry2x32 (T:T) = struct
     let _ = if nrounds>31 then (x0 := add !x0 !x1; x1 := rotL !x1 rotations.r_7; x1 := logxor !x1 !x0;) else () in
     let _ = if nrounds>31 then (
         x0 := add !x0 ks2; x1 := add !x1 ks0;
-        x1 := add !x1 8l;
+        x1 := add !x1 rotations.i_8;
       ) else () in
 
     [|!x0; !x1|]
@@ -170,3 +188,5 @@ module Threefry2x32 (T:T) = struct
     rand_R T.default_rounds ctr key
 
 end
+
+module Threefry2x32 = Threefry2xW(ThreefryInt32)
