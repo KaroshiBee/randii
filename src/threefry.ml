@@ -82,15 +82,15 @@ module Consts = struct
     i_7: 'a;
   }
 
-  let make i_0 i_1 i_2 i_3 i_4 i_5 i_6 i_7 = {
-    i_0=i_0;
-    i_1=i_1;
-    i_2=i_2;
-    i_3=i_3;
-    i_4=i_4;
-    i_5=i_5;
-    i_6=i_6;
-    i_7=i_7;
+  let make f i_0 i_1 i_2 i_3 i_4 i_5 i_6 i_7 = {
+    i_0=f i_0;
+    i_1=f i_1;
+    i_2=f i_2;
+    i_3=f i_3;
+    i_4=f i_4;
+    i_5=f i_5;
+    i_6=f i_6;
+    i_7=f i_7;
   }
 
 end
@@ -109,45 +109,49 @@ module type T = sig
 
 end
 
-module Int32_T = struct
+module UInt32_T = struct
 
-  type t = Int32.t
+  type t = Unsigned.UInt32.t
 
   let default_rounds = 20
+  let _31 = 31 |> Unsigned.UInt32.of_int
+  let _32 = 32 |> Unsigned.UInt32.of_int
 
   (* #define SKEIN_KS_PARITY32         0x1BD11BDA *)
-  let skein_ks_parity = 0x1BD11BDA |> Int32.of_int
+  let skein_ks_parity = 0x1BD11BDA |> Unsigned.UInt32.of_int
 
   let rotations = Consts.make
-      13l
-      15l
-      26l
-      6l
-      17l
-      29l
-      16l
-      24l
+      Unsigned.UInt32.of_int
+      13
+      15
+      26
+      6
+      17
+      29
+      16
+      24
 
   let indices = Consts.make
-      1l
-      2l
-      3l
-      4l
-      5l
-      6l
-      7l
-      8l
+      Unsigned.UInt32.of_int
+      1
+      2
+      3
+      4
+      5
+      6
+      7
+      8
 
-  let rotL x n = Int32.(
-      let l = logand n 31l |> to_int in
+  let rotL x n = Unsigned.UInt32.(
+      let l = logand n _31 |> to_int in
       let left = shift_left x l in
-      let r = (logand (sub 32l n) 31l) |> to_int in
+      let r = (logand (sub _32 n) _31) |> to_int in
       let right = shift_right x r in
       logor left right
     )
 
-  let add = Int32.add
-  let logxor = Int32.logxor
+  let add = Unsigned.UInt32.add
+  let logxor = Unsigned.UInt32.logxor
 
 end
 
@@ -172,6 +176,7 @@ module Int64_T = struct
     _skein_mk_64 hi32 lo32
 
   let rotations = Consts.make
+      (fun x -> x)
       16L
       42L
       12L
@@ -182,6 +187,7 @@ module Int64_T = struct
       21L
 
   let indices = Consts.make
+      (fun x -> x)
       1L
       2L
       3L
@@ -317,5 +323,5 @@ module Make_threefry2xW (T:T) : (RAND_T with type ctr_t := T.t array and type ke
 
 end
 
-module Threefry2x32 = Make_threefry2xW(Int32_T)
+module Threefry2x32 = Make_threefry2xW(UInt32_T)
 module Threefry2x64 = Make_threefry2xW(Int64_T)
