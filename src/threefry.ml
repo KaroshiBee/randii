@@ -95,9 +95,9 @@ module Consts = struct
 
 end
 
-(* factor out dependence on Int32 / Int64 *)
+(* factor out dependence on UInt32 / UInt64 *)
 module type T = sig
-  type t (* Int32 or Int64 *)
+  type t (* UInt32 or UInt64 *)
   val default_rounds : int
   val skein_ks_parity : t
   val rotations : t Consts.t
@@ -155,65 +155,67 @@ module UInt32_T = struct
 
 end
 
-module Int64_T = struct
+module UInt64_T = struct
 
-  type t = Int64.t
+  type t = Unsigned.UInt64.t
 
   let default_rounds = 20
+  let _63 = 63 |> Unsigned.UInt64.of_int
+  let _64 = 64 |> Unsigned.UInt64.of_int
 
-  let _skein_mk_64 hi32 lo32 = Int64.(
+  let _skein_mk_64 hi32 lo32 = Unsigned.UInt64.(
       (* #define SKEIN_MK_64(hi32,lo32)  ((lo32) + (((uint64_t) (hi32)) << 32))
        * #define SKEIN_KS_PARITY64         SKEIN_MK_64(0x1BD11BDA,0xA9FC1A22) *)
       (* convert hi32 to Int64, shift_left by 32, add to lo32 *)
-      let lo64 = lo32 |> of_int32 in
-      let hi64 = hi32 |> of_int32 in
+      let lo64 = lo32 |> of_uint32 in
+      let hi64 = hi32 |> of_uint32 in
       add lo64 (shift_left hi64 32)
     )
 
   let skein_ks_parity =
-    let hi32 = 0x1BD11BDA |> Int32.of_int in
-    let lo32 = 0xA9FC1A22 |> Int32.of_int in
+    let hi32 = 0x1BD11BDA |> Unsigned.UInt32.of_int in
+    let lo32 = 0xA9FC1A22 |> Unsigned.UInt32.of_int in
     _skein_mk_64 hi32 lo32
 
   let rotations = Consts.make
-      (fun x -> x)
-      16L
-      42L
-      12L
-      31L
-      16L
-      32L
-      24L
-      21L
+      Unsigned.UInt64.of_int
+      16
+      42
+      12
+      31
+      16
+      32
+      24
+      21
 
   let indices = Consts.make
-      (fun x -> x)
-      1L
-      2L
-      3L
-      4L
-      5L
-      6L
-      7L
-      8L
+      Unsigned.UInt64.of_int
+      1
+      2
+      3
+      4
+      5
+      6
+      7
+      8
 
-  let rotL x n = Int64.(
-      let l = logand n 63L |> to_int in
+  let rotL x n = Unsigned.UInt64.(
+      let l = logand n _63 |> to_int in
       let left = shift_left x l in
-      let r = (logand (sub 64L n) 63L) |> to_int in
+      let r = (logand (sub _64 n) _63) |> to_int in
       let right = shift_right x r in
       logor left right
     )
 
-  let add = Int64.add
-  let logxor = Int64.logxor
+  let add = Unsigned.UInt64.add
+  let logxor = Unsigned.UInt64.logxor
 
 end
 
 (*
  * NOTE needs to be unsigned int32 / int64
  * Probably need a module for ctr_t and key_t
- * to stop incorrect constructions *)
+ * to stop incorrect constructions and allow for incr operation *)
 
 module type RAND_T = sig
   type ctr_t
@@ -324,4 +326,4 @@ module Make_threefry2xW (T:T) : (RAND_T with type ctr_t := T.t array and type ke
 end
 
 module Threefry2x32 = Make_threefry2xW(UInt32_T)
-module Threefry2x64 = Make_threefry2xW(Int64_T)
+module Threefry2x64 = Make_threefry2xW(UInt64_T)
