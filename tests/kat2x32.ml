@@ -1,3 +1,15 @@
+(* kat - Known Answer Test
+ * from random123/tests/kat_vectors
+ * threefry2x32 13 00000000 00000000 00000000 00000000 9d1c5ec6 8bd50731
+   threefry2x32 13 ffffffff ffffffff ffffffff ffffffff fd36d048 2d17272c
+   threefry2x32 13 243f6a88 85a308d3 13198a2e 03707344 ba3e4725 f27d669e
+   threefry2x32 20 00000000 00000000 00000000 00000000   6b200159 99ba4efe
+   threefry2x32 20 ffffffff ffffffff ffffffff ffffffff   1cb996fc bb002be7
+   threefry2x32 20 243f6a88 85a308d3 13198a2e 03707344   c4923a9c 483df7a0
+   threefry2x32 32 00000000 00000000 00000000 00000000 cee3d47e a23dfd5c
+   threefry2x32 32 ffffffff ffffffff ffffffff ffffffff 6e2fe0d0 b1b76f82
+   threefry2x32 32 243f6a88 85a308d3 13198a2e 03707344 e2827716 c3c05cdf
+*)
 module R = Randii.Threefry.Threefry2x32_TEST
 module I = Unsigned.UInt32
 
