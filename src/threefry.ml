@@ -223,7 +223,12 @@ module type RAND_T = sig
   val rand : ctr_t -> key_t -> ctr_t
 end
 
-module Make_threefry2xW (T:T) : (RAND_T with type ctr_t := T.t array and type key_t := T.t array)= struct
+module type RAND_TEST_T = sig
+  include RAND_T
+  val rand_R : int -> ctr_t -> key_t -> ctr_t
+end
+
+module Make_threefry2xW_TEST (T:T) : (RAND_TEST_T with type ctr_t := T.t array and type key_t := T.t array) = struct
 
   type t = T.t
   type ctr_t = t array
@@ -325,5 +330,12 @@ module Make_threefry2xW (T:T) : (RAND_T with type ctr_t := T.t array and type ke
 
 end
 
+module Make_threefry2xW (T:T) : (RAND_T with type ctr_t := T.t array and type key_t := T.t array) = struct
+  include Make_threefry2xW_TEST(T)
+end
+
 module Threefry2x32 = Make_threefry2xW(UInt32_T)
 module Threefry2x64 = Make_threefry2xW(UInt64_T)
+
+module Threefry2x32_TEST = Make_threefry2xW_TEST(UInt32_T)
+module Threefry2x64_TEST = Make_threefry2xW_TEST(UInt64_T)
