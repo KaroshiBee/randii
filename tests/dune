@@ -1,0 +1,3 @@
+(tests
+  (names kat2x32)
+  (libraries alcotest randii))
