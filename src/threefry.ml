@@ -163,19 +163,21 @@ module UInt64_T = struct
   let _63 = 63 |> Unsigned.UInt64.of_int
   let _64 = 64 |> Unsigned.UInt64.of_int
 
-  let _skein_mk_64 hi32 lo32 = Unsigned.UInt64.(
-      (* #define SKEIN_MK_64(hi32,lo32)  ((lo32) + (((uint64_t) (hi32)) << 32))
-       * #define SKEIN_KS_PARITY64         SKEIN_MK_64(0x1BD11BDA,0xA9FC1A22) *)
-      (* convert hi32 to Int64, shift_left by 32, add to lo32 *)
-      let lo64 = lo32 |> of_uint32 in
-      let hi64 = hi32 |> of_uint32 in
-      add lo64 (shift_left hi64 32)
-    )
+  (* let _skein_mk_64 hi32 lo32 = Unsigned.UInt64.(
+   *     (\* #define SKEIN_MK_64(hi32,lo32)  ((lo32) + (((uint64_t) (hi32)) << 32))
+   *      * #define SKEIN_KS_PARITY64         SKEIN_MK_64(0x1BD11BDA,0xA9FC1A22) *\)
+   *     (\* convert hi32 to Int64, shift_left by 32, add to lo32 *\)
+   *     let lo64 = lo32 |> of_uint32 in
+   *     let hi64 = hi32 |> of_uint32 in
+   *     add lo64 (shift_left hi64 32)
+   *   )
+   *
+   * let skein_ks_parity =
+   *   let hi32 = 0x1BD11BDA |> Unsigned.UInt32.of_int in
+   *   let lo32 = 0xA9FC1A22 |> Unsigned.UInt32.of_int in
+   *   _skein_mk_64 hi32 lo32 *)
 
-  let skein_ks_parity =
-    let hi32 = 0x1BD11BDA |> Unsigned.UInt32.of_int in
-    let lo32 = 0xA9FC1A22 |> Unsigned.UInt32.of_int in
-    _skein_mk_64 hi32 lo32
+  let skein_ks_parity = "2004413935125273122" |> Unsigned.UInt64.of_string
 
   let rotations = Consts.make
       Unsigned.UInt64.of_int
