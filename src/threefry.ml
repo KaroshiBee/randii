@@ -71,7 +71,7 @@
 
 module Consts = struct
   type 'a t = {
-    (* rotation amounts or increments *)
+    (* rotation amounts *)
     i_0: 'a;
     i_1: 'a;
     i_2: 'a;
@@ -93,35 +93,52 @@ module Consts = struct
     i_7=f i_7;
   }
 
+  let zeros f = {
+    i_0=f 0;
+    i_1=f 0;
+    i_2=f 0;
+    i_3=f 0;
+    i_4=f 0;
+    i_5=f 0;
+    i_6=f 0;
+    i_7=f 0;
+  }
+
 end
 
 (* factor out dependence on UInt32 / UInt64 *)
 module type T = sig
   type t (* UInt32 or UInt64 *)
-  val default_rounds : int
-  val skein_ks_parity : t
-  val rotations : t Consts.t
-  val indices : t Consts.t
-
-  val rotL : t -> t -> t
   val add : t -> t -> t
   val logxor : t -> t -> t
+  val of_int : int -> t
+
+  val default_rounds : int
+  val skein_ks_parity : t
+  val rotations_0 : t Consts.t
+  val rotations_1 : t Consts.t
+
+  val rotL : t -> t -> t
 
 end
 
-module UInt32_T = struct
+module UInt32_2_T = struct
 
   type t = Unsigned.UInt32.t
 
+  let add = Unsigned.UInt32.add
+  let logxor = Unsigned.UInt32.logxor
+  let of_int = Unsigned.UInt32.of_int
+
   let default_rounds = 20
-  let _31 = 31 |> Unsigned.UInt32.of_int
-  let _32 = 32 |> Unsigned.UInt32.of_int
+  let _31 = 31 |> of_int
+  let _32 = 32 |> of_int
 
   (* #define SKEIN_KS_PARITY32         0x1BD11BDA *)
-  let skein_ks_parity = 0x1BD11BDA |> Unsigned.UInt32.of_int
+  let skein_ks_parity = 0x1BD11BDA |> of_int
 
-  let rotations = Consts.make
-      Unsigned.UInt32.of_int
+  let rotations_0 = Consts.make
+      of_int
       13
       15
       26
@@ -131,16 +148,7 @@ module UInt32_T = struct
       16
       24
 
-  let indices = Consts.make
-      Unsigned.UInt32.of_int
-      1
-      2
-      3
-      4
-      5
-      6
-      7
-      8
+  let rotations_1 = Consts.zeros of_int
 
   let rotL x n = Unsigned.UInt32.(
       let l = logand n _31 |> to_int in
@@ -150,18 +158,46 @@ module UInt32_T = struct
       logor left right
     )
 
-  let add = Unsigned.UInt32.add
-  let logxor = Unsigned.UInt32.logxor
+end
+
+module UInt32_4_T = struct
+  include UInt32_2_T
+
+  let rotations_0 = Consts.make
+      of_int
+      10
+      11
+      13
+      23
+      6
+      17
+      25
+      18
+
+  let rotations_1 = Consts.make
+      of_int
+      26
+      21
+      27
+      5
+      20
+      11
+      10
+      20
 
 end
 
-module UInt64_T = struct
+module UInt64_2_T = struct
 
   type t = Unsigned.UInt64.t
 
+  let add = Unsigned.UInt64.add
+  let logxor = Unsigned.UInt64.logxor
+  let of_int = Unsigned.UInt64.of_int
+
   let default_rounds = 20
-  let _63 = 63 |> Unsigned.UInt64.of_int
-  let _64 = 64 |> Unsigned.UInt64.of_int
+  let _63 = 63 |> of_int
+  let _64 = 64 |> of_int
 
   let _skein_mk_64 hi32 lo32 = Unsigned.UInt64.(
       (* #define SKEIN_MK_64(hi32,lo32)  ((lo32) + (((uint64_t) (hi32)) << 32))
@@ -177,8 +213,8 @@ module UInt64_T = struct
     let lo32 = 0xA9FC1A22 |> Unsigned.UInt32.of_int in
     _skein_mk_64 hi32 lo32
 
-  let rotations = Consts.make
-      Unsigned.UInt64.of_int
+  let rotations_0 = Consts.make
+      of_int
       16
       42
       12
@@ -188,16 +224,7 @@ module UInt64_T = struct
       24
       21
 
-  let indices = Consts.make
-      Unsigned.UInt64.of_int
-      1
-      2
-      3
-      4
-      5
-      6
-      7
-      8
+  let rotations_1 = Consts.zeros of_int
 
   let rotL x n = Unsigned.UInt64.(
       let l = logand n _63 |> to_int in
@@ -207,8 +234,32 @@ module UInt64_T = struct
       logor left right
     )
 
-  let add = Unsigned.UInt64.add
-  let logxor = Unsigned.UInt64.logxor
+end
+
+module UInt64_4_T = struct
+  include UInt64_2_T
+
+  let rotations_0 = Consts.make
+      of_int
+      14
+      52
+      23
+      5
+      25
+      46
+      58
+      32
+
+  let rotations_1 = Consts.make
+      of_int
+      16
+      57
+      40
+      37
+      33
+      12
+      22
+      32
 
 end
 
@@ -223,6 +274,7 @@ module type RAND_T = sig
   val rand : ctr_t -> key_t -> ctr_t
 end
 
+(* expose rand_R for testing purposes *)
 module type RAND_TEST_T = sig
   include RAND_T
   val rand_R : int -> ctr_t -> key_t -> ctr_t
@@ -234,8 +286,26 @@ module Make_threefry2xW_TEST (T:T) : (RAND_TEST_T with type ctr_t := T.t array a
   type ctr_t = t array
   type key_t = t array
 
-  let _aux lbound nrounds x0 x1 i =
-    if nrounds>lbound then T.(x0 := add !x0 !x1; x1 := rotL !x1 i; x1 := logxor !x1 !x0;) else ()
+  let _aux1 lbound nrounds x0 x1 i =
+    (* if(Nrounds>0){  X0 += X1; X1 = RotL_##W(X1,R_##W##x2_0_0); X1 ^= X0; }  *)
+    if nrounds>lbound then T.(
+        x0 := add !x0 !x1; x1 := rotL !x1 i; x1 := logxor !x1 !x0;
+      )
+    else ()
+
+  let _aux3 lbound nrounds x0 x1 ks0 ks1 i =
+    (*
+     if(Nrounds>3){                                                      \
+        /* InjectKey(r=1) */                                            \
+        X0 += ks1; X1 += ks2;                               \
+        X1 += 1;     /* X.v[2-1] += r  */                   \
+     }                                                                   \
+    *)
+    if nrounds>lbound then T.(
+        x0 := add !x0 ks0; x1 := add !x1 ks1;
+        x1 := add !x1 (of_int i)
+      )
+    else ()
 
   let rand_R nrounds (ctr:ctr_t) (key:key_t) =
     let open T in
@@ -254,77 +324,53 @@ module Make_threefry2xW_TEST (T:T) : (RAND_TEST_T with type ctr_t := T.t array a
     let x1 = ref (add ctr.(1) ks1) in
     let ks2 = logxor ks2 ks1 in
 
-    let _ = _aux 0 nrounds x0 x1 rotations.i_0 in
-    let _ = _aux 1 nrounds x0 x1 rotations.i_1 in
-    let _ = _aux 2 nrounds x0 x1 rotations.i_2 in
-    let _ = _aux 3 nrounds x0 x1 rotations.i_3 in
-    let _ = if nrounds>3 then (
-        x0 := add !x0 ks1; x1 := add !x1 ks2;
-        x1 := add !x1 indices.i_0;
-      ) else () in
+    let _ = _aux1  0 nrounds x0 x1 rotations_0.i_0 in
+    let _ = _aux1  1 nrounds x0 x1 rotations_0.i_1 in
+    let _ = _aux1  2 nrounds x0 x1 rotations_0.i_2 in
+    let _ = _aux1  3 nrounds x0 x1 rotations_0.i_3 in
+    let _ = _aux3  3 nrounds x0 x1 ks1 ks2 1 in
 
-    let _ = _aux 4 nrounds x0 x1 rotations.i_4 in
-    let _ = _aux 5 nrounds x0 x1 rotations.i_5 in
-    let _ = _aux 6 nrounds x0 x1 rotations.i_6 in
-    let _ = _aux 7 nrounds x0 x1 rotations.i_7 in
-    let _ = if nrounds>7 then (
-        x0 := add !x0 ks2; x1 := add !x1 ks0;
-        x1 := add !x1 indices.i_1;
-      ) else () in
+    let _ = _aux1  4 nrounds x0 x1 rotations_0.i_4 in
+    let _ = _aux1  5 nrounds x0 x1 rotations_0.i_5 in
+    let _ = _aux1  6 nrounds x0 x1 rotations_0.i_6 in
+    let _ = _aux1  7 nrounds x0 x1 rotations_0.i_7 in
+    let _ = _aux3  7 nrounds x0 x1 ks2 ks0 2 in
 
-    let _ = _aux 8 nrounds x0 x1 rotations.i_0 in
-    let _ = _aux 9 nrounds x0 x1 rotations.i_1 in
-    let _ = _aux 10 nrounds x0 x1 rotations.i_2 in
-    let _ = _aux 11 nrounds x0 x1 rotations.i_3 in
-    let _ = if nrounds>11 then (
-        x0 := add !x0 ks0; x1 := add !x1 ks1;
-        x1 := add !x1 indices.i_2;
-      ) else () in
+    let _ = _aux1  8 nrounds x0 x1 rotations_0.i_0 in
+    let _ = _aux1  9 nrounds x0 x1 rotations_0.i_1 in
+    let _ = _aux1 10 nrounds x0 x1 rotations_0.i_2 in
+    let _ = _aux1 11 nrounds x0 x1 rotations_0.i_3 in
+    let _ = _aux3 11 nrounds x0 x1 ks0 ks1 3 in
 
-    let _ = _aux 12 nrounds x0 x1 rotations.i_4 in
-    let _ = _aux 13 nrounds x0 x1 rotations.i_5 in
-    let _ = _aux 14 nrounds x0 x1 rotations.i_6 in
-    let _ = _aux 15 nrounds x0 x1 rotations.i_7 in
-    let _ = if nrounds>15 then (
-        x0 := add !x0 ks1; x1 := add !x1 ks2;
-        x1 := add !x1 indices.i_3;
-      ) else () in
+    let _ = _aux1 12 nrounds x0 x1 rotations_0.i_4 in
+    let _ = _aux1 13 nrounds x0 x1 rotations_0.i_5 in
+    let _ = _aux1 14 nrounds x0 x1 rotations_0.i_6 in
+    let _ = _aux1 15 nrounds x0 x1 rotations_0.i_7 in
+    let _ = _aux3 15 nrounds x0 x1 ks1 ks2 4 in
 
-    let _ = _aux 16 nrounds x0 x1 rotations.i_0 in
-    let _ = _aux 17 nrounds x0 x1 rotations.i_1 in
-    let _ = _aux 18 nrounds x0 x1 rotations.i_2 in
-    let _ = _aux 19 nrounds x0 x1 rotations.i_3 in
-    let _ = if nrounds>19 then (
-        x0 := add !x0 ks2; x1 := add !x1 ks0;
-        x1 := add !x1 indices.i_4;
-      ) else () in
+    let _ = _aux1 16 nrounds x0 x1 rotations_0.i_0 in
+    let _ = _aux1 17 nrounds x0 x1 rotations_0.i_1 in
+    let _ = _aux1 18 nrounds x0 x1 rotations_0.i_2 in
+    let _ = _aux1 19 nrounds x0 x1 rotations_0.i_3 in
+    let _ = _aux3 19 nrounds x0 x1 ks2 ks0 5 in
 
-    let _ = _aux 20 nrounds x0 x1 rotations.i_4 in
-    let _ = _aux 21 nrounds x0 x1 rotations.i_5 in
-    let _ = _aux 22 nrounds x0 x1 rotations.i_6 in
-    let _ = _aux 23 nrounds x0 x1 rotations.i_7 in
-    let _ = if nrounds>23 then (
-        x0 := add !x0 ks0; x1 := add !x1 ks1;
-        x1 := add !x1 indices.i_5;
-      ) else () in
+    let _ = _aux1 20 nrounds x0 x1 rotations_0.i_4 in
+    let _ = _aux1 21 nrounds x0 x1 rotations_0.i_5 in
+    let _ = _aux1 22 nrounds x0 x1 rotations_0.i_6 in
+    let _ = _aux1 23 nrounds x0 x1 rotations_0.i_7 in
+    let _ = _aux3 23 nrounds x0 x1 ks0 ks1 6 in
 
-    let _ = _aux 24 nrounds x0 x1 rotations.i_0 in
-    let _ = _aux 25 nrounds x0 x1 rotations.i_1 in
-    let _ = _aux 26 nrounds x0 x1 rotations.i_2 in
-    let _ = _aux 27 nrounds x0 x1 rotations.i_3 in
-    let _ = if nrounds>27 then (
-        x0 := add !x0 ks1; x1 := add !x1 ks2;
-        x1 := add !x1 indices.i_6;
-      ) else () in
+    let _ = _aux1 24 nrounds x0 x1 rotations_0.i_0 in
+    let _ = _aux1 25 nrounds x0 x1 rotations_0.i_1 in
+    let _ = _aux1 26 nrounds x0 x1 rotations_0.i_2 in
+    let _ = _aux1 27 nrounds x0 x1 rotations_0.i_3 in
+    let _ = _aux3 27 nrounds x0 x1 ks1 ks2 7 in
 
-    let _ = _aux 28 nrounds x0 x1 rotations.i_4 in
-    let _ = _aux 29 nrounds x0 x1 rotations.i_5 in
-    let _ = _aux 30 nrounds x0 x1 rotations.i_6 in
-    let _ = _aux 31 nrounds x0 x1 rotations.i_7 in
-    let _ = if nrounds>31 then (
-        x0 := add !x0 ks2; x1 := add !x1 ks0;
-        x1 := add !x1 indices.i_7;
-      ) else () in
+    let _ = _aux1 28 nrounds x0 x1 rotations_0.i_4 in
+    let _ = _aux1 29 nrounds x0 x1 rotations_0.i_5 in
+    let _ = _aux1 30 nrounds x0 x1 rotations_0.i_6 in
+    let _ = _aux1 31 nrounds x0 x1 rotations_0.i_7 in
+    let _ = _aux3 31 nrounds x0 x1 ks2 ks0 8 in
 
     [|!x0; !x1|]
 
@@ -333,10 +379,199 @@ module Make_threefry2xW_TEST (T:T) : (RAND_TEST_T with type ctr_t := T.t array a
 
 end
 
+module Make_threefry4xW_TEST (T:T) : (RAND_TEST_T with type ctr_t := T.t array and type key_t := T.t array) = struct
+
+  type t = T.t
+  type ctr_t = t array
+  type key_t = t array
+
+  let _aux1 lbound nrounds x0 x1 x2 x3 i_0 i_1 =
+    (* if(Nrounds>0){                                                      \
+     *     X0 += X1; X1 = RotL_##W(X1,R_##W##x4_0_0); X1 ^= X0; \
+     *     X2 += X3; X3 = RotL_##W(X3,R_##W##x4_0_1); X3 ^= X2; \
+     * }                                                                   \ *)
+    if nrounds>lbound then T.(
+        x0 := add !x0 !x1; x1 := rotL !x1 i_0; x1 := logxor !x1 !x0;
+        x2 := add !x2 !x3; x3 := rotL !x3 i_1; x3 := logxor !x3 !x2;
+      )
+    else ()
+
+  let _aux2 lbound nrounds x0 x1 x2 x3 i_0 i_1 =
+    (* if(Nrounds>1){                                                      \
+     *     X0 += X3; X3 = RotL_##W(X3,R_##W##x4_1_0); X3 ^= X0; \
+     *     X2 += X1; X1 = RotL_##W(X1,R_##W##x4_1_1); X1 ^= X2; \
+     * }                                                                   \ *)
+    if nrounds>lbound then T.(
+        x0 := add !x0 !x3; x3 := rotL !x3 i_0; x3 := logxor !x3 !x0;
+        x2 := add !x2 !x1; x1 := rotL !x1 i_1; x1 := logxor !x1 !x2;
+      )
+    else ()
+
+  let _aux3 lbound nrounds x0 x1 x2 x3 y0 y1 y2 y3 i =
+    (* if(Nrounds>3){                                                      \
+     *     /* InjectKey(r=1) */                                            \
+     *     X0 += ks1; X1 += ks2; X2 += ks3; X3 += ks4; \
+     *     X3 += 1;     /* XWCNT4-1 += r  */                 \
+     * }                                                                   \ *)
+    if nrounds>lbound then T.(
+        x0 := add !x0 y0; x1 := add !x1 y1; x2 := add !x2 y2; x3 := add !x3 y3;
+        x3 := add !x3 (of_int i);
+      )
+    else ()
+
+  let rand_R nrounds (ctr:ctr_t) (key:key_t) =
+    let open T in
+    let max_rounds = 72 in
+    let _ = if nrounds > max_rounds then
+        failwith @@ Printf.sprintf
+          "number rounds must be <= %d" max_rounds
+      else ()
+    in
+    let ks4 = skein_ks_parity in
+    let ks0 = key.(0) in
+    let x0 = ref (add ctr.(0) ks0) in
+    let ks4 = logxor ks4 ks0 in
+
+    let ks1 = key.(1) in
+    let x1 = ref (add ctr.(1) ks1) in
+    let ks4 = logxor ks4 ks1 in
+
+    let ks2 = key.(2) in
+    let x2 = ref (add ctr.(2) ks2) in
+    let ks4 = logxor ks4 ks2 in
+
+    let ks3 = key.(3) in
+    let x3 = ref (add ctr.(3) ks3) in
+    let ks4 = logxor ks4 ks3 in
+
+    let _ = _aux1  0 nrounds x0 x1 x2 x3 rotations_0.i_0 rotations_1.i_0 in
+    let _ = _aux2  1 nrounds x0 x1 x2 x3 rotations_0.i_1 rotations_1.i_1 in
+    let _ = _aux1  2 nrounds x0 x1 x2 x3 rotations_0.i_2 rotations_1.i_2 in
+    let _ = _aux2  3 nrounds x0 x1 x2 x3 rotations_0.i_3 rotations_1.i_3 in
+    let _ = _aux3  3 nrounds x0 x1 x2 x3 ks1 ks2 ks3 ks4 1 in
+
+    let _ = _aux1  4 nrounds x0 x1 x2 x3 rotations_0.i_4 rotations_1.i_4 in
+    let _ = _aux2  5 nrounds x0 x1 x2 x3 rotations_0.i_5 rotations_1.i_5 in
+    let _ = _aux1  6 nrounds x0 x1 x2 x3 rotations_0.i_6 rotations_1.i_6 in
+    let _ = _aux2  7 nrounds x0 x1 x2 x3 rotations_0.i_7 rotations_1.i_7 in
+    let _ = _aux3  7 nrounds x0 x1 x2 x3 ks2 ks3 ks4 ks0 2 in
+
+    let _ = _aux1  8 nrounds x0 x1 x2 x3 rotations_0.i_0 rotations_1.i_0 in
+    let _ = _aux2  9 nrounds x0 x1 x2 x3 rotations_0.i_1 rotations_1.i_1 in
+    let _ = _aux1 10 nrounds x0 x1 x2 x3 rotations_0.i_2 rotations_1.i_2 in
+    let _ = _aux2 11 nrounds x0 x1 x2 x3 rotations_0.i_3 rotations_1.i_3 in
+    let _ = _aux3 11 nrounds x0 x1 x2 x3 ks3 ks4 ks0 ks1 3 in
+
+    let _ = _aux1 12 nrounds x0 x1 x2 x3 rotations_0.i_4 rotations_1.i_4 in
+    let _ = _aux2 13 nrounds x0 x1 x2 x3 rotations_0.i_5 rotations_1.i_5 in
+    let _ = _aux1 14 nrounds x0 x1 x2 x3 rotations_0.i_6 rotations_1.i_6 in
+    let _ = _aux2 15 nrounds x0 x1 x2 x3 rotations_0.i_7 rotations_1.i_7 in
+    let _ = _aux3 15 nrounds x0 x1 x2 x3 ks4 ks0 ks1 ks2 4 in
+
+    let _ = _aux1 16 nrounds x0 x1 x2 x3 rotations_0.i_0 rotations_1.i_0 in
+    let _ = _aux2 17 nrounds x0 x1 x2 x3 rotations_0.i_1 rotations_1.i_1 in
+    let _ = _aux1 18 nrounds x0 x1 x2 x3 rotations_0.i_2 rotations_1.i_2 in
+    let _ = _aux2 19 nrounds x0 x1 x2 x3 rotations_0.i_3 rotations_1.i_3 in
+    let _ = _aux3 19 nrounds x0 x1 x2 x3 ks0 ks1 ks2 ks3 5 in
+
+    let _ = _aux1 20 nrounds x0 x1 x2 x3 rotations_0.i_4 rotations_1.i_4 in
+    let _ = _aux2 21 nrounds x0 x1 x2 x3 rotations_0.i_5 rotations_1.i_5 in
+    let _ = _aux1 22 nrounds x0 x1 x2 x3 rotations_0.i_6 rotations_1.i_6 in
+    let _ = _aux2 23 nrounds x0 x1 x2 x3 rotations_0.i_7 rotations_1.i_7 in
+    let _ = _aux3 23 nrounds x0 x1 x2 x3 ks1 ks2 ks3 ks4 6 in
+
+    let _ = _aux1 24 nrounds x0 x1 x2 x3 rotations_0.i_0 rotations_1.i_0 in
+    let _ = _aux2 25 nrounds x0 x1 x2 x3 rotations_0.i_1 rotations_1.i_1 in
+    let _ = _aux1 26 nrounds x0 x1 x2 x3 rotations_0.i_2 rotations_1.i_2 in
+    let _ = _aux2 27 nrounds x0 x1 x2 x3 rotations_0.i_3 rotations_1.i_3 in
+    let _ = _aux3 27 nrounds x0 x1 x2 x3 ks2 ks3 ks4 ks0 7 in
+
+    let _ = _aux1 28 nrounds x0 x1 x2 x3 rotations_0.i_4 rotations_1.i_4 in
+    let _ = _aux2 29 nrounds x0 x1 x2 x3 rotations_0.i_5 rotations_1.i_5 in
+    let _ = _aux1 30 nrounds x0 x1 x2 x3 rotations_0.i_6 rotations_1.i_6 in
+    let _ = _aux2 31 nrounds x0 x1 x2 x3 rotations_0.i_7 rotations_1.i_7 in
+    let _ = _aux3 31 nrounds x0 x1 x2 x3 ks3 ks4 ks0 ks1 8 in
+
+    let _ = _aux1 32 nrounds x0 x1 x2 x3 rotations_0.i_0 rotations_1.i_0 in
+    let _ = _aux2 33 nrounds x0 x1 x2 x3 rotations_0.i_1 rotations_1.i_1 in
+    let _ = _aux1 34 nrounds x0 x1 x2 x3 rotations_0.i_2 rotations_1.i_2 in
+    let _ = _aux2 35 nrounds x0 x1 x2 x3 rotations_0.i_3 rotations_1.i_3 in
+    let _ = _aux3 35 nrounds x0 x1 x2 x3 ks4 ks0 ks1 ks2 9 in
+
+    let _ = _aux1 36 nrounds x0 x1 x2 x3 rotations_0.i_4 rotations_1.i_4 in
+    let _ = _aux2 37 nrounds x0 x1 x2 x3 rotations_0.i_5 rotations_1.i_5 in
+    let _ = _aux1 38 nrounds x0 x1 x2 x3 rotations_0.i_6 rotations_1.i_6 in
+    let _ = _aux2 39 nrounds x0 x1 x2 x3 rotations_0.i_7 rotations_1.i_7 in
+    let _ = _aux3 39 nrounds x0 x1 x2 x3 ks0 ks1 ks2 ks3 10 in
+
+    let _ = _aux1 40 nrounds x0 x1 x2 x3 rotations_0.i_0 rotations_1.i_0 in
+    let _ = _aux2 41 nrounds x0 x1 x2 x3 rotations_0.i_1 rotations_1.i_1 in
+    let _ = _aux1 42 nrounds x0 x1 x2 x3 rotations_0.i_2 rotations_1.i_2 in
+    let _ = _aux2 43 nrounds x0 x1 x2 x3 rotations_0.i_3 rotations_1.i_3 in
+    let _ = _aux3 43 nrounds x0 x1 x2 x3 ks1 ks2 ks3 ks4 11 in
+
+    let _ = _aux1 44 nrounds x0 x1 x2 x3 rotations_0.i_4 rotations_1.i_4 in
+    let _ = _aux2 45 nrounds x0 x1 x2 x3 rotations_0.i_5 rotations_1.i_5 in
+    let _ = _aux1 46 nrounds x0 x1 x2 x3 rotations_0.i_6 rotations_1.i_6 in
+    let _ = _aux2 47 nrounds x0 x1 x2 x3 rotations_0.i_7 rotations_1.i_7 in
+    let _ = _aux3 47 nrounds x0 x1 x2 x3 ks2 ks3 ks4 ks0 12 in
+
+    let _ = _aux1 48 nrounds x0 x1 x2 x3 rotations_0.i_0 rotations_1.i_0 in
+    let _ = _aux2 49 nrounds x0 x1 x2 x3 rotations_0.i_1 rotations_1.i_1 in
+    let _ = _aux1 50 nrounds x0 x1 x2 x3 rotations_0.i_2 rotations_1.i_2 in
+    let _ = _aux2 51 nrounds x0 x1 x2 x3 rotations_0.i_3 rotations_1.i_3 in
+    let _ = _aux3 51 nrounds x0 x1 x2 x3 ks3 ks4 ks0 ks1 13 in
+
+    let _ = _aux1 52 nrounds x0 x1 x2 x3 rotations_0.i_4 rotations_1.i_4 in
+    let _ = _aux2 53 nrounds x0 x1 x2 x3 rotations_0.i_5 rotations_1.i_5 in
+    let _ = _aux1 54 nrounds x0 x1 x2 x3 rotations_0.i_6 rotations_1.i_6 in
+    let _ = _aux2 55 nrounds x0 x1 x2 x3 rotations_0.i_7 rotations_1.i_7 in
+    let _ = _aux3 55 nrounds x0 x1 x2 x3 ks4 ks0 ks1 ks2 14 in
+
+    let _ = _aux1 56 nrounds x0 x1 x2 x3 rotations_0.i_0 rotations_1.i_0 in
+    let _ = _aux2 57 nrounds x0 x1 x2 x3 rotations_0.i_1 rotations_1.i_1 in
+    let _ = _aux1 58 nrounds x0 x1 x2 x3 rotations_0.i_2 rotations_1.i_2 in
+    let _ = _aux2 59 nrounds x0 x1 x2 x3 rotations_0.i_3 rotations_1.i_3 in
+    let _ = _aux3 59 nrounds x0 x1 x2 x3 ks0 ks1 ks2 ks3 15 in
+
+    let _ = _aux1 60 nrounds x0 x1 x2 x3 rotations_0.i_4 rotations_1.i_4 in
+    let _ = _aux2 61 nrounds x0 x1 x2 x3 rotations_0.i_5 rotations_1.i_5 in
+    let _ = _aux1 62 nrounds x0 x1 x2 x3 rotations_0.i_6 rotations_1.i_6 in
+    let _ = _aux2 63 nrounds x0 x1 x2 x3 rotations_0.i_7 rotations_1.i_7 in
+    let _ = _aux3 63 nrounds x0 x1 x2 x3 ks1 ks2 ks3 ks4 16 in
+
+    let _ = _aux1 64 nrounds x0 x1 x2 x3 rotations_0.i_0 rotations_1.i_0 in
+    let _ = _aux2 65 nrounds x0 x1 x2 x3 rotations_0.i_1 rotations_1.i_1 in
+    let _ = _aux1 66 nrounds x0 x1 x2 x3 rotations_0.i_2 rotations_1.i_2 in
+    let _ = _aux2 67 nrounds x0 x1 x2 x3 rotations_0.i_3 rotations_1.i_3 in
+    let _ = _aux3 67 nrounds x0 x1 x2 x3 ks2 ks3 ks4 ks0 17 in
+
+    let _ = _aux1 68 nrounds x0 x1 x2 x3 rotations_0.i_4 rotations_1.i_4 in
+    let _ = _aux2 69 nrounds x0 x1 x2 x3 rotations_0.i_5 rotations_1.i_5 in
+    let _ = _aux1 70 nrounds x0 x1 x2 x3 rotations_0.i_6 rotations_1.i_6 in
+    let _ = _aux2 71 nrounds x0 x1 x2 x3 rotations_0.i_7 rotations_1.i_7 in
+    let _ = _aux3 71 nrounds x0 x1 x2 x3 ks3 ks4 ks0 ks1 18 in
+
+    [|!x0; !x1; !x2; !x3|]
+
+
+  let rand (ctr:ctr_t) (key:key_t) =
+    rand_R T.default_rounds ctr key
+
+end
+
+
 module Make_threefry2xW (T:T) : (RAND_T with type ctr_t := T.t array and type key_t := T.t array) = struct
   include Make_threefry2xW_TEST(T)
 end
 
-module Threefry2x32 = Make_threefry2xW(UInt32_T)
-module Threefry2x64 = Make_threefry2xW(UInt64_T)
+module Make_threefry4xW (T:T) : (RAND_T with type ctr_t := T.t array and type key_t := T.t array) = struct
+  include Make_threefry4xW_TEST(T)
+end
 
+(* TODO is there a way to make sure only UIntXX_2_T goes with Threefry2xW *)
+module Threefry2x32 = Make_threefry2xW(UInt32_2_T)
+module Threefry2x64 = Make_threefry2xW(UInt64_2_T)
+
+module Threefry4x32 = Make_threefry4xW(UInt32_4_T)
+module Threefry4x64 = Make_threefry4xW(UInt64_4_T)
