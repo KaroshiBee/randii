@@ -10,8 +10,8 @@
    threefry2x64 32 ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff 6b532f4f6e288646 0388f1ec135ee18e
    threefry2x64 32 243f6a8885a308d3 13198a2e03707344 a4093822299f31d0 082efa98ec4e6c89 dad492f32efbd0c4 b6d7d0cd1f193e84
 *)
-module R = Randii.Threefry.Threefry2x64_TEST
 module U = Randii.Threefry.UInt64_T
+module R = Randii.Threefry.Make_threefry2xW_TEST(U)
 module I = Unsigned.UInt64
 
 (* The tests *)

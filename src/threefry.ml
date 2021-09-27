@@ -340,5 +340,3 @@ end
 module Threefry2x32 = Make_threefry2xW(UInt32_T)
 module Threefry2x64 = Make_threefry2xW(UInt64_T)
 
-module Threefry2x32_TEST = Make_threefry2xW_TEST(UInt32_T)
-module Threefry2x64_TEST = Make_threefry2xW_TEST(UInt64_T)
