@@ -88,7 +88,7 @@ let test_32_rounds_pi () =
 
 (* Run it *)
 let () =
-  Alcotest.run "Utils"
+  Alcotest.run "Threefry2x32 Known Answers"
     [
       ( "kat13",
         [

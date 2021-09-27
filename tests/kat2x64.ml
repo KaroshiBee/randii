@@ -136,7 +136,7 @@ let test_skein_ks_parity () =
 
 (* Run it *)
 let () =
-  Alcotest.run "Utils"
+  Alcotest.run "Threefry2x64 Known Answers"
     [
       ( "kat13",
         [
