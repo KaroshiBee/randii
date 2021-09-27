@@ -11,6 +11,7 @@
    threefry2x64 32 243f6a8885a308d3 13198a2e03707344 a4093822299f31d0 082efa98ec4e6c89 dad492f32efbd0c4 b6d7d0cd1f193e84
 *)
 module R = Randii.Threefry.Threefry2x64_TEST
+module U = Randii.Threefry.UInt64_T
 module I = Unsigned.UInt64
 
 (* The tests *)
@@ -126,6 +127,13 @@ let test_32_rounds_pi () =
     "kat for 32 rounds with pi digits input"
     expected actual
 
+let test_skein_ks_parity () =
+  let expected = "2004413935125273122" in
+  let actual = U.skein_ks_parity |> Unsigned.UInt64.to_string in
+  Alcotest.(check string)
+    "skein ks parity test"
+    expected actual
+
 (* Run it *)
 let () =
   Alcotest.run "Utils"
@@ -148,4 +156,9 @@ let () =
           Alcotest.test_case "ffff" `Quick test_32_rounds_ffff;
           Alcotest.test_case "pi" `Quick test_32_rounds_pi;
         ] );
+      ( "skein_ks_parity",
+        [
+          Alcotest.test_case "skein ks test" `Quick test_skein_ks_parity;
+        ]
+      );
     ]
