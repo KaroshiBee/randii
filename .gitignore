@@ -95,5 +95,4 @@ ENV/
 
 # ocaml/dune
 _build/
-/current_incr/
-/old-blasso/
+_coverage/
