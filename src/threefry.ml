@@ -106,8 +106,12 @@ module Consts = struct
 
 end
 
+type two_digits
+type four_digits
+
 (* factor out dependence on UInt32 / UInt64 *)
 module type T = sig
+  type digits
   type t (* UInt32 or UInt64 *)
   val add : t -> t -> t
   val logxor : t -> t -> t
@@ -122,8 +126,20 @@ module type T = sig
 
 end
 
+module type T2 = sig
+  include T
+  type digits = two_digits
+end
+
+module type T4 = sig
+  include T
+  type digits = four_digits
+end
+
+
 module UInt32_2_T = struct
 
+  type digits = two_digits
   type t = Unsigned.UInt32.t
 
   let add = Unsigned.UInt32.add
@@ -163,6 +179,8 @@ end
 module UInt32_4_T = struct
   include UInt32_2_T
 
+  type digits = four_digits
+
   let rotations_0 = Consts.make
       of_int
       10
@@ -189,6 +207,7 @@ end
 
 module UInt64_2_T = struct
 
+  type digits = two_digits
   type t = Unsigned.UInt64.t
 
   let add = Unsigned.UInt64.add
@@ -239,6 +258,8 @@ end
 module UInt64_4_T = struct
   include UInt64_2_T
 
+  type digits = four_digits
+
   let rotations_0 = Consts.make
       of_int
       14
@@ -280,7 +301,7 @@ module type RAND_TEST_T = sig
   val rand_R : int -> ctr_t -> key_t -> ctr_t
 end
 
-module Make_threefry2xW_TEST (T:T) : (RAND_TEST_T with type ctr_t := T.t array and type key_t := T.t array) = struct
+module Make_threefry2xW_TEST (T:T2) : (RAND_TEST_T with type ctr_t := T.t array and type key_t := T.t array) = struct
 
   type t = T.t
   type ctr_t = t array
@@ -379,7 +400,7 @@ module Make_threefry2xW_TEST (T:T) : (RAND_TEST_T with type ctr_t := T.t array a
 
 end
 
-module Make_threefry4xW_TEST (T:T) : (RAND_TEST_T with type ctr_t := T.t array and type key_t := T.t array) = struct
+module Make_threefry4xW_TEST (T:T4) : (RAND_TEST_T with type ctr_t := T.t array and type key_t := T.t array) = struct
 
   type t = T.t
   type ctr_t = t array
@@ -561,17 +582,17 @@ module Make_threefry4xW_TEST (T:T) : (RAND_TEST_T with type ctr_t := T.t array a
 end
 
 
-module Make_threefry2xW (T:T) : (RAND_T with type ctr_t := T.t array and type key_t := T.t array) = struct
+module Make_threefry2xW (T:T2) : (RAND_T with type ctr_t := T.t array and type key_t := T.t array) = struct
   include Make_threefry2xW_TEST(T)
 end
 
-module Make_threefry4xW (T:T) : (RAND_T with type ctr_t := T.t array and type key_t := T.t array) = struct
+module Make_threefry4xW (T:T4) : (RAND_T with type ctr_t := T.t array and type key_t := T.t array) = struct
   include Make_threefry4xW_TEST(T)
 end
 
-(* TODO is there a way to make sure only UIntXX_2_T goes with Threefry2xW *)
 module Threefry2x32 = Make_threefry2xW(UInt32_2_T)
 module Threefry2x64 = Make_threefry2xW(UInt64_2_T)
 
 module Threefry4x32 = Make_threefry4xW(UInt32_4_T)
 module Threefry4x64 = Make_threefry4xW(UInt64_4_T)
+
