@@ -17,8 +17,6 @@ The test suite uses Known Answer Tests from the test suite of the
   but it would be good to subject this implementation to the same BIGCRUSH, CRUSH and SMALLCRUSH [statistical tests](http://simul.iro.umontreal.ca/testu01/tu01.html) 
   as the original,
   
-* ctr_t type for two digit and four digit 32/64 bit numbers,
+* basic arithmetic for ctr_t type,
 
 * unbiased mapping to discrete-uniform(0, n) using only integer arithmetic,
-
-* better type checking for two/four digit, 32/64 bit modules when used together i.e. forbid usage such as Make_threefry2xW(UInt32_4_T), 
