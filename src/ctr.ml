@@ -1,13 +1,4 @@
-module type T = sig
-  type t
-  val to_string : t -> string
-  val equal : t -> t -> bool
-  val succ : t -> t
-  val pred : t -> t
-  val zero : t
-  val one : t
-  val max_int : t
-end
+type digits = | Two | Four
 
 module type CTR = sig
   type el
@@ -17,11 +8,10 @@ module type CTR = sig
   val to_string_array : t -> string array
   val succ : t -> unit
   val pred : t -> unit
+  val digits : t -> digits
 end
 
-type digits = | Two | Four
-
-module Ctr (U:T) : (CTR with type el := U.t)= struct
+module Make_ctr (U:Threefry.T) : (CTR with type el := U.t) = struct
   type el = U.t
   type t = {
     data: el array;
@@ -51,7 +41,7 @@ module Ctr (U:T) : (CTR with type el := U.t)= struct
   let succ = aux_i 0 U.succ U.zero
   let pred = aux_i 0 U.pred U.max_int
 
+  let digits t = t.digits
+
 end
 
-module Ctr_32 = Ctr(Unsigned.UInt32)
-module Ctr_64 = Ctr(Unsigned.UInt64)

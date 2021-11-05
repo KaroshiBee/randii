@@ -109,13 +109,23 @@ end
 type two_digits
 type four_digits
 
+
 (* factor out dependence on UInt32 / UInt64 *)
 module type T = sig
   type digits
   type t (* UInt32 or UInt64 *)
-  val add : t -> t -> t
-  val logxor : t -> t -> t
   val of_int : int -> t
+  val to_string : t -> string
+  val equal : t -> t -> bool
+  val succ : t -> t
+  val pred : t -> t
+  val zero : t
+  val one : t
+  val max_int : t
+  val add : t -> t -> t
+  val sub : t -> t -> t
+  val rem : t -> t -> t
+  val logxor : t -> t -> t
 
   val default_rounds : int
   val skein_ks_parity : t
@@ -138,13 +148,14 @@ end
 
 
 module UInt32_2_T = struct
+  include Unsigned.UInt32
 
   type digits = two_digits
-  type t = Unsigned.UInt32.t
-
-  let add = Unsigned.UInt32.add
-  let logxor = Unsigned.UInt32.logxor
-  let of_int = Unsigned.UInt32.of_int
+  (* type t = Unsigned.UInt32.t
+   *
+   * let add = Unsigned.UInt32.add
+   * let logxor = Unsigned.UInt32.logxor
+   * let of_int = Unsigned.UInt32.of_int *)
 
   let default_rounds = 20
   let _31 = 31 |> of_int
@@ -166,13 +177,12 @@ module UInt32_2_T = struct
 
   let rotations_1 = Consts.zeros of_int
 
-  let rotL x n = Unsigned.UInt32.(
-      let l = logand n _31 |> to_int in
-      let left = shift_left x l in
-      let r = (logand (sub _32 n) _31) |> to_int in
-      let right = shift_right x r in
-      logor left right
-    )
+  let rotL x n =
+    let l = logand n _31 |> to_int in
+    let left = shift_left x l in
+    let r = (logand (sub _32 n) _31) |> to_int in
+    let right = shift_right x r in
+    logor left right
 
 end
 
@@ -206,26 +216,21 @@ module UInt32_4_T = struct
 end
 
 module UInt64_2_T = struct
+  include Unsigned.UInt64
 
   type digits = two_digits
-  type t = Unsigned.UInt64.t
-
-  let add = Unsigned.UInt64.add
-  let logxor = Unsigned.UInt64.logxor
-  let of_int = Unsigned.UInt64.of_int
 
   let default_rounds = 20
   let _63 = 63 |> of_int
   let _64 = 64 |> of_int
 
-  let _skein_mk_64 hi32 lo32 = Unsigned.UInt64.(
-      (* #define SKEIN_MK_64(hi32,lo32)  ((lo32) + (((uint64_t) (hi32)) << 32))
-       * #define SKEIN_KS_PARITY64         SKEIN_MK_64(0x1BD11BDA,0xA9FC1A22) *)
-      (* convert hi32 to Int64, shift_left by 32, add to lo32 *)
-      let lo64 = lo32 |> of_uint32 in
-      let hi64 = hi32 |> of_uint32 in
-      add lo64 (shift_left hi64 32)
-    )
+  let _skein_mk_64 hi32 lo32 =
+    (* #define SKEIN_MK_64(hi32,lo32)  ((lo32) + (((uint64_t) (hi32)) << 32))
+     * #define SKEIN_KS_PARITY64         SKEIN_MK_64(0x1BD11BDA,0xA9FC1A22) *)
+    (* convert hi32 to Int64, shift_left by 32, add to lo32 *)
+    let lo64 = lo32 |> of_uint32 in
+    let hi64 = hi32 |> of_uint32 in
+    add lo64 (shift_left hi64 32)
 
   let skein_ks_parity =
     let hi32 = 0x1BD11BDA |> Unsigned.UInt32.of_int in
@@ -245,13 +250,12 @@ module UInt64_2_T = struct
 
   let rotations_1 = Consts.zeros of_int
 
-  let rotL x n = Unsigned.UInt64.(
-      let l = logand n _63 |> to_int in
-      let left = shift_left x l in
-      let r = (logand (sub _64 n) _63) |> to_int in
-      let right = shift_right x r in
-      logor left right
-    )
+  let rotL x n =
+    let l = logand n _63 |> to_int in
+    let left = shift_left x l in
+    let r = (logand (sub _64 n) _63) |> to_int in
+    let right = shift_right x r in
+    logor left right
 
 end
 
@@ -595,4 +599,3 @@ module Threefry2x64 = Make_threefry2xW(UInt64_2_T)
 
 module Threefry4x32 = Make_threefry4xW(UInt32_4_T)
 module Threefry4x64 = Make_threefry4xW(UInt64_4_T)
-

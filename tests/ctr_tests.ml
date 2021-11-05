@@ -1,4 +1,6 @@
-module Ctr_test (I:Randii.Ctr.T) (C:Randii.Ctr.CTR with type el := I.t) = struct
+module Ctr_test (I:Randii.Threefry.T) = struct
+
+  module C = Randii.Ctr.Make_ctr(I)
 
   let test_of_array () =
     let z = I.zero in
@@ -22,7 +24,7 @@ module Ctr_test (I:Randii.Ctr.T) (C:Randii.Ctr.CTR with type el := I.t) = struct
     let () = C.succ zs in
     let actual = C.to_string_array zs in
     Alcotest.(check (array string))
-      "Ctr_32 - succ 0 with 4 digits"
+      "succ 0 with 4 digits"
       expected actual
 
   let test_succ_rollover () =
@@ -33,7 +35,7 @@ module Ctr_test (I:Randii.Ctr.T) (C:Randii.Ctr.CTR with type el := I.t) = struct
     let () = C.succ ms in
     let actual = C.to_string_array ms in
     Alcotest.(check (array string))
-      "Ctr_32 - succ max with 4 digits"
+      "succ max with 4 digits"
       expected actual
 
   let test_pred () =
@@ -43,7 +45,7 @@ module Ctr_test (I:Randii.Ctr.T) (C:Randii.Ctr.CTR with type el := I.t) = struct
     let () = C.pred zs in
     let actual = C.to_string_array zs in
     Alcotest.(check (array string))
-      "Ctr_32 - pred 0 with 4 digits"
+      "pred 0 with 4 digits"
       expected actual
 
   let test_pred_rollover () =
@@ -54,7 +56,7 @@ module Ctr_test (I:Randii.Ctr.T) (C:Randii.Ctr.CTR with type el := I.t) = struct
     let () = C.pred zs in
     let actual = C.to_string_array zs in
     Alcotest.(check (array string))
-      "Ctr_32 - pred max with 4 digits"
+      "pred max with 4 digits"
       expected actual
 
   let test_failure_0 () =
@@ -70,44 +72,80 @@ module Ctr_test (I:Randii.Ctr.T) (C:Randii.Ctr.CTR with type el := I.t) = struct
 
 end
 
-module T32 = Ctr_test (Unsigned.UInt32) (Randii.Ctr.Ctr_32)
-module T64 = Ctr_test (Unsigned.UInt64) (Randii.Ctr.Ctr_64)
+module T32_2 = Ctr_test (Randii.Threefry.UInt32_2_T)
+module T64_2 = Ctr_test (Randii.Threefry.UInt64_2_T)
+module T32_4 = Ctr_test (Randii.Threefry.UInt32_4_T)
+module T64_4 = Ctr_test (Randii.Threefry.UInt64_4_T)
 
 let () =
   Alcotest.run "Counter Unittests"
     [
       (
-        "32bit pred/succ",
+        "2x32bit pred/succ",
         [
-          Alcotest.test_case "of_array" `Quick T32.test_of_array;
-          Alcotest.test_case "4x32 bit successor" `Quick T32.test_succ;
-          Alcotest.test_case "4x32 bit successor of max" `Quick T32.test_succ_rollover;
-          Alcotest.test_case "4x32 bit predecessor" `Quick T32.test_pred;
-          Alcotest.test_case "4x32 bit predecessor of max" `Quick T32.test_pred_rollover;
+          Alcotest.test_case "of_array" `Quick T32_2.test_of_array;
+          Alcotest.test_case "2x32 bit successor" `Quick T32_2.test_succ;
+          Alcotest.test_case "2x32 bit successor of max" `Quick T32_2.test_succ_rollover;
+          Alcotest.test_case "2x32 bit predecessor" `Quick T32_2.test_pred;
+          Alcotest.test_case "2x32 bit predecessor of max" `Quick T32_2.test_pred_rollover;
         ]
       );
       (
-        "64bit pred/succ",
+        "2x64bit pred/succ",
         [
-          Alcotest.test_case "of_array" `Quick T64.test_of_array;
-          Alcotest.test_case "4x64 bit successor" `Quick T64.test_succ;
-          Alcotest.test_case "4x64 bit successor of max" `Quick T64.test_succ_rollover;
-          Alcotest.test_case "4x64 bit predecessor" `Quick T64.test_pred;
-          Alcotest.test_case "4x64 bit predecessor of max" `Quick T64.test_pred_rollover;
+          Alcotest.test_case "of_array" `Quick T64_2.test_of_array;
+          Alcotest.test_case "2x64 bit successor" `Quick T64_2.test_succ;
+          Alcotest.test_case "2x64 bit successor of max" `Quick T64_2.test_succ_rollover;
+          Alcotest.test_case "2x64 bit predecessor" `Quick T64_2.test_pred;
+          Alcotest.test_case "2x64 bit predecessor of max" `Quick T64_2.test_pred_rollover;
         ]
       );
       (
-        "32bit failures",
+        "2x32bit failures",
         [
-          Alcotest.test_case "no data" `Quick T32.test_failure_0;
-          Alcotest.test_case "too big" `Quick T32.test_failure_too_big;
+          Alcotest.test_case "no data" `Quick T32_2.test_failure_0;
+          Alcotest.test_case "too big" `Quick T32_2.test_failure_too_big;
         ]
       );
       (
-        "64bit failures",
+        "2x64bit failures",
         [
-          Alcotest.test_case "no data" `Quick T64.test_failure_0;
-          Alcotest.test_case "too big" `Quick T64.test_failure_too_big;
+          Alcotest.test_case "no data" `Quick T64_2.test_failure_0;
+          Alcotest.test_case "too big" `Quick T64_2.test_failure_too_big;
+        ]
+      );
+      (
+        "4x32bit pred/succ",
+        [
+          Alcotest.test_case "of_array" `Quick T32_4.test_of_array;
+          Alcotest.test_case "4x32 bit successor" `Quick T32_4.test_succ;
+          Alcotest.test_case "4x32 bit successor of max" `Quick T32_4.test_succ_rollover;
+          Alcotest.test_case "4x32 bit predecessor" `Quick T32_4.test_pred;
+          Alcotest.test_case "4x32 bit predecessor of max" `Quick T32_4.test_pred_rollover;
+        ]
+      );
+      (
+        "4x64bit pred/succ",
+        [
+          Alcotest.test_case "of_array" `Quick T64_4.test_of_array;
+          Alcotest.test_case "4x64 bit successor" `Quick T64_4.test_succ;
+          Alcotest.test_case "4x64 bit successor of max" `Quick T64_4.test_succ_rollover;
+          Alcotest.test_case "4x64 bit predecessor" `Quick T64_4.test_pred;
+          Alcotest.test_case "4x64 bit predecessor of max" `Quick T64_4.test_pred_rollover;
+        ]
+      );
+      (
+        "4x32bit failures",
+        [
+          Alcotest.test_case "no data" `Quick T32_4.test_failure_0;
+          Alcotest.test_case "too big" `Quick T32_4.test_failure_too_big;
+        ]
+      );
+      (
+        "4x64bit failures",
+        [
+          Alcotest.test_case "no data" `Quick T64_4.test_failure_0;
+          Alcotest.test_case "too big" `Quick T64_4.test_failure_too_big;
         ]
       );
     ]
