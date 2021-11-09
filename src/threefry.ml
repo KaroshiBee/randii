@@ -296,13 +296,13 @@ end
 module type RAND_T = sig
   type ctr_t
   type key_t
-  val rand : ctr_t -> key_t -> ctr_t
+  val rand : key_t -> ctr_t -> ctr_t
 end
 
 (* expose rand_R for testing purposes *)
 module type RAND_TEST_T = sig
   include RAND_T
-  val rand_R : int -> ctr_t -> key_t -> ctr_t
+  val rand_R : int -> key_t -> ctr_t -> ctr_t
 end
 
 module Make_threefry2xW_TEST (T:T2) : (RAND_TEST_T with type ctr_t := T.t array and type key_t := T.t array) = struct
@@ -332,7 +332,7 @@ module Make_threefry2xW_TEST (T:T2) : (RAND_TEST_T with type ctr_t := T.t array 
       )
     else ()
 
-  let rand_R nrounds (ctr:ctr_t) (key:key_t) =
+  let rand_R nrounds (key:key_t) (ctr:ctr_t) =
     let open T in
     let max_rounds = 32 in
     let _ = if nrounds > max_rounds then
@@ -399,8 +399,8 @@ module Make_threefry2xW_TEST (T:T2) : (RAND_TEST_T with type ctr_t := T.t array 
 
     [|!x0; !x1|]
 
-  let rand (ctr:ctr_t) (key:key_t) =
-    rand_R T.default_rounds ctr key
+  let rand (key:key_t) (ctr:ctr_t) =
+    rand_R T.default_rounds key ctr
 
 end
 
@@ -444,7 +444,7 @@ module Make_threefry4xW_TEST (T:T4) : (RAND_TEST_T with type ctr_t := T.t array 
       )
     else ()
 
-  let rand_R nrounds (ctr:ctr_t) (key:key_t) =
+  let rand_R nrounds (key:key_t) (ctr:ctr_t) =
     let open T in
     let max_rounds = 72 in
     let _ = if nrounds > max_rounds then
@@ -580,8 +580,8 @@ module Make_threefry4xW_TEST (T:T4) : (RAND_TEST_T with type ctr_t := T.t array 
     [|!x0; !x1; !x2; !x3|]
 
 
-  let rand (ctr:ctr_t) (key:key_t) =
-    rand_R T.default_rounds ctr key
+  let rand (key:key_t) (ctr:ctr_t) =
+    rand_R T.default_rounds key ctr
 
 end
 

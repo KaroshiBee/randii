@@ -21,7 +21,7 @@ module Ctr_test (I:Randii.Threefry.T) = struct
     let z = I.zero in
     let zs = [|z;z;z;z|] |> C.of_array in
     let expected = [|I.one;z;z;z|] |> Array.map I.to_string in
-    let () = C.succ zs in
+    let zs = C.succ zs in
     let actual = C.to_string_array zs in
     Alcotest.(check (array string))
       "succ 0 with 4 digits"
@@ -32,7 +32,7 @@ module Ctr_test (I:Randii.Threefry.T) = struct
     let m = I.max_int in
     let ms = [|m;m;m;m|] |> C.of_array in
     let expected = [|z;z;z;z|] |> Array.map I.to_string in
-    let () = C.succ ms in
+    let ms = C.succ ms in
     let actual = C.to_string_array ms in
     Alcotest.(check (array string))
       "succ max with 4 digits"
@@ -42,7 +42,7 @@ module Ctr_test (I:Randii.Threefry.T) = struct
     let z = I.zero in
     let zs = [|I.one;z;z;z|] |> C.of_array in
     let expected = [|z;z;z;z|] |> Array.map I.to_string in
-    let () = C.pred zs in
+    let zs = C.pred zs in
     let actual = C.to_string_array zs in
     Alcotest.(check (array string))
       "pred 0 with 4 digits"
@@ -53,7 +53,7 @@ module Ctr_test (I:Randii.Threefry.T) = struct
     let zs = [|z;z;z;z|] |> C.of_array in
     let m = I.max_int in
     let expected = [|m;m;m;m|] |> Array.map I.to_string in
-    let () = C.pred zs in
+    let zs = C.pred zs in
     let actual = C.to_string_array zs in
     Alcotest.(check (array string))
       "pred max with 4 digits"

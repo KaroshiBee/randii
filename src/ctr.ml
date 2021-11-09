@@ -6,9 +6,11 @@ module type CTR = sig
   val of_array : el array -> t
   val to_array : t -> el array
   val to_string_array : t -> string array
-  val succ : t -> unit
-  val pred : t -> unit
+  val copy : t -> t
+  val succ : t -> t
+  val pred : t -> t
   val digits : t -> digits
+  val data : t -> el array
 end
 
 module Make_ctr (U:Threefry.T) : (CTR with type el := U.t) = struct
@@ -29,6 +31,8 @@ module Make_ctr (U:Threefry.T) : (CTR with type el := U.t) = struct
   let to_array {data; _} = Array.copy data
   let to_string_array t = to_array t |> Array.map U.to_string
 
+  let copy {data; digits} = {data=Array.copy data; digits}
+
   let rec aux_i digit f sentinal {data; digits} =
     let n = Array.length data in
     if digit == n then () else (
@@ -38,10 +42,9 @@ module Make_ctr (U:Threefry.T) : (CTR with type el := U.t) = struct
       | true -> data.(digit) <- d; aux_i (digit+1) f sentinal {data; digits}
     )
 
-  let succ = aux_i 0 U.succ U.zero
-  let pred = aux_i 0 U.pred U.max_int
+  let succ t = aux_i 0 U.succ U.zero t; t
+  let pred t = aux_i 0 U.pred U.max_int t; t
 
   let digits t = t.digits
-
+  let data t = t.data
 end
-
