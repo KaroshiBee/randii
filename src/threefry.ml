@@ -151,11 +151,6 @@ module UInt32_2_T = struct
   include Unsigned.UInt32
 
   type digits = two_digits
-  (* type t = Unsigned.UInt32.t
-   *
-   * let add = Unsigned.UInt32.add
-   * let logxor = Unsigned.UInt32.logxor
-   * let of_int = Unsigned.UInt32.of_int *)
 
   let default_rounds = 20
   let _31 = 31 |> of_int
@@ -291,7 +286,9 @@ end
 (*
  * NOTE needs to be unsigned int32 / int64
  * Probably need a module for ctr_t and key_t
- * to stop incorrect constructions and allow for incr operation *)
+ * to stop incorrect constructions and allow for incr operation
+ *
+ * NOTE also that this implementation swaps around the args key/ctr *)
 
 module type RAND_T = sig
   type ctr_t
