@@ -17,40 +17,48 @@ let info ~doc name =
     ~version
     name
 
-let process rng_name_arg () =
+let process rng_name_arg key_arg ctr_arg () =
   let (let*) = Result.bind in
   let () = Logs.info (fun m -> m "rng with '%s'" rng_name_arg) in
+  let () = Logs.info (fun m -> m "command line key: [%s]" @@ String.concat "," key_arg) in
+  let () = Logs.info (fun m -> m "command line ctr: [%s]" @@ String.concat "," ctr_arg) in
+
+  let key_arg = if List.length key_arg > 0 then Some (Array.of_list key_arg) else None in
+  let ctr_arg = if List.length ctr_arg > 0 then Some (Array.of_list ctr_arg) else None in
+
+  (* default key/ctr values *)
   let key2 = [|"0";"1"|] in
   let key4 = [|"0";"1";"2";"3"|] in
-  let ctr2 = [|"2";"3"|] in
-  let ctr4 = [|"4";"5";"6";"7"|] in
-  let p ~rng_name_arg () =
+  let ctr2 = [|"0";"1"|] in
+  let ctr4 = [|"0";"1";"2";"3"|] in
+
+  let p ~rng_name_arg ?key_arg ?ctr_arg () =
     let* {word_size; digits; algo} = R.RngName.of_string rng_name_arg in
     let* arr = match (word_size, digits, algo) with
       | R.Word_size.ThirtyTwo, R.Digits.Two, R.Algo.Threefry ->
         let r = R.R2x32.rand in
-        let key = Array.map R.I32.of_string key2 in
-        let ctr = Array.map R.I32.of_string ctr2 in
+        let key = Array.map R.I32.of_string @@ Option.value key_arg ~default:key2 in
+        let ctr = Array.map R.I32.of_string @@ Option.value ctr_arg ~default:ctr2 in
         r key ctr |> Array.map R.I32.to_string |> Result.ok
       | R.Word_size.ThirtyTwo, R.Digits.Four, R.Algo.Threefry ->
         let r = R.R4x32.rand in
-        let key = Array.map R.I32.of_string key4 in
-        let ctr = Array.map R.I32.of_string ctr4 in
+        let key = Array.map R.I32.of_string @@ Option.value key_arg ~default:key4 in
+        let ctr = Array.map R.I32.of_string @@ Option.value ctr_arg ~default:ctr4 in
         r key ctr |> Array.map R.I32.to_string |> Result.ok
       | R.Word_size.SixtyFour, R.Digits.Two, R.Algo.Threefry ->
         let r = R.R2x64.rand in
-        let key = Array.map R.I64.of_string key2 in
-        let ctr = Array.map R.I64.of_string ctr2 in
+        let key = Array.map R.I64.of_string @@ Option.value key_arg ~default:key2 in
+        let ctr = Array.map R.I64.of_string @@ Option.value ctr_arg ~default:ctr2 in
         r key ctr |> Array.map R.I64.to_string |> Result.ok
       | R.Word_size.SixtyFour, R.Digits.Four, R.Algo.Threefry ->
         let r = R.R4x64.rand in
-        let key = Array.map R.I64.of_string key4 in
-        let ctr = Array.map R.I64.of_string ctr4 in
+        let key = Array.map R.I64.of_string @@ Option.value key_arg ~default:key4 in
+        let ctr = Array.map R.I64.of_string @@ Option.value ctr_arg ~default:ctr4 in
         r key ctr |> Array.map R.I64.to_string |> Result.ok
     in
     Result.ok (Array.iter (fun s -> Printf.printf "\n%s" s) arr; Printf.printf "\n")
   in
-  match p ~rng_name_arg () with
+  match p ~rng_name_arg ?key_arg ?ctr_arg () with
   | Result.Ok () -> `Ok ()
   | Result.Error e -> `Error (true, (Randii.Errors.to_string e))
 
@@ -68,10 +76,32 @@ module Term = struct
       value & opt string "threefry4x64" & info ["r"; "rng"] ~doc ~docv:"NAME"
     )
 
+  let key_arg =
+    let doc =
+      "The random generator starting key (optional). \
+       To be given in the form -k key1 -k key2 ...etc \
+       depending on the digit size of the RNG you have specified.
+      "
+    in
+    Arg.(
+      value & opt_all string [] & info ["k"] ~doc ~docv:"INT"
+    )
+
+  let ctr_arg =
+    let doc =
+      "The random generator starting ctr (optional). \
+       To be given in the form -c ctr1 -c ctr2 ...etc \
+       depending on the digit size of the RNG you have specified.
+      "
+    in
+    Arg.(
+      value & opt_all string [] & info ["c"] ~doc ~docv:"INT"
+    )
+
   let term (setup_log:unit Term.t) =
     Cmdliner.Term.(
       let t =
-        (const process $ rng_name_arg $ setup_log)
+        (const process $ rng_name_arg $ key_arg $ ctr_arg $ setup_log)
       in
       ret t
     )
