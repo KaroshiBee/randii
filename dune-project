@@ -1,18 +1,18 @@
 (lang dune 2.8)
 (name randii)
-(version 0.9.0)
+(version 1.0.0)
 
 (generate_opam_files true)
 
-(source (github wyn/randii))
+(source (github KaroshiBee/randii))
 (license MIT)
 (authors "Simon Parry")
 (maintainers "simon.parry@karoshibee.com")
 
 (package
  (name randii)
- (synopsis "An OCaml port of the Random123 counter based random number generator")
- (description "A longer description")
+ (synopsis "A pure OCaml port of the Random123 counter based random number generator")
+ (description "Currently implements the Threefry 2&4 digit 32&64 bit random number generators")
  (depends
   (integers (>= 0.4.0))
   (dune (> 1.5))

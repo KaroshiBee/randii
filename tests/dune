@@ -1,3 +1,5 @@
 (tests
   (names kat threefry_tests ctr_tests)
-  (libraries alcotest zarith randii))
+  (libraries alcotest zarith randii)
+  (deps (glob_files data/*))
+)

@@ -143,12 +143,11 @@ let read_lines name : string list =
 let read_kat_data ln =
   try
     Some (RngData.of_string ln)
-  with Invalid_argument _ -> None
-(* with Invalid_argument s -> match s with
- *   | "Unknown generator" -> None
- *   | s ->
- *     Printf.printf "ERROR: %s\n" s;
- *     None *)
+  with Invalid_argument s -> match s with
+    | "Unknown generator" -> None
+    | s ->
+      Printf.printf "ERROR: %s\n" s;
+      None
 
 let test_kat_data i rng_data () =
   let RngData.{name; nrounds; ctr; key; expected} = rng_data in
@@ -168,12 +167,12 @@ let test_kat_data i rng_data () =
 
 (* Run it *)
 let () =
-  let kat_data = read_lines "kat_vectors"
+  let kat_data = read_lines "data/kat_vectors"
                  |> List.map read_kat_data
                  |> List.filter Option.is_some
                  |> List.map Option.get
   in
-  let kat_data_old = read_lines "old_kat_vectors"
+  let kat_data_old = read_lines "data/old_kat_vectors"
                      |> List.map read_kat_data
                      |> List.filter Option.is_some
                      |> List.map Option.get

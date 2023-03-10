@@ -1,5 +1,0 @@
-(library
- (name randii)
- (public_name randii)
- (libraries integers)
- (instrumentation (backend bisect_ppx)))
