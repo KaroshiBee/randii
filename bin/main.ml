@@ -1,12 +1,4 @@
 module R = Randii.Rng
-(* module C = Randii.Ctr *)
-(* module T = Randii.Threefry *)
-
-(* module Ctr2x32 = C.Make_ctr(T.UInt32_2_T) *)
-(* module Ctr2x64 = C.Make_ctr(T.UInt64_2_T) *)
-(* module Ctr4x32 = C.Make_ctr(T.UInt32_4_T) *)
-(* module Ctr4x64 = C.Make_ctr(T.UInt64_4_T) *)
-
 module Threefry_2x32 = Randii.Rng.Threefry_2x32
 module Threefry_2x64 = Randii.Rng.Threefry_2x64
 module Threefry_4x32 = Randii.Rng.Threefry_4x32
