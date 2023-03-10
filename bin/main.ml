@@ -18,13 +18,40 @@ let info ~doc name =
     name
 
 let process rng_name_arg () =
-  let p
-      ~rng_name_arg:_
-      () =
-    (* let rng_name = R.RngName.of_string *)
-    `Ok ()
+  let (let*) = Result.bind in
+  let key2 = [|"0";"1"|] in
+  let key4 = [|"0";"1";"2";"3"|] in
+  let ctr2 = [|"2";"3"|] in
+  let ctr4 = [|"4";"5";"6";"7"|] in
+  let p ~rng_name_arg () =
+    let* {word_size; digits; algo} = R.RngName.of_string rng_name_arg in
+    let* arr = match (word_size, digits, algo) with
+      | R.Word_size.ThirtyTwo, R.Digits.Two, R.Algo.Threefry ->
+        let r = R.R2x32.rand in
+        let key = Array.map R.I32.of_string key2 in
+        let ctr = Array.map R.I32.of_string ctr2 in
+        r key ctr |> Array.map R.I32.to_string |> Result.ok
+      | R.Word_size.ThirtyTwo, R.Digits.Four, R.Algo.Threefry ->
+        let r = R.R4x32.rand in
+        let key = Array.map R.I32.of_string key4 in
+        let ctr = Array.map R.I32.of_string ctr4 in
+        r key ctr |> Array.map R.I32.to_string |> Result.ok
+      | R.Word_size.SixtyFour, R.Digits.Two, R.Algo.Threefry ->
+        let r = R.R2x64.rand in
+        let key = Array.map R.I64.of_string key2 in
+        let ctr = Array.map R.I64.of_string ctr2 in
+        r key ctr |> Array.map R.I64.to_string |> Result.ok
+      | R.Word_size.SixtyFour, R.Digits.Four, R.Algo.Threefry ->
+        let r = R.R4x64.rand in
+        let key = Array.map R.I64.of_string key4 in
+        let ctr = Array.map R.I64.of_string ctr4 in
+        r key ctr |> Array.map R.I64.to_string |> Result.ok
+    in
+    Result.ok (Array.iter (fun s -> Printf.printf "\n%s" s) arr; Printf.printf "\n")
   in
-  p ~rng_name_arg ()
+  match p ~rng_name_arg () with
+  | Result.Ok () -> `Ok ()
+  | Result.Error e -> `Error (true, (Randii.Errors.to_string e))
 
 module Term = struct
   open Cmdliner
