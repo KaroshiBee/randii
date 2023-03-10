@@ -21,7 +21,12 @@ let info ~doc name =
     ~version
     name
 
-let process rng_name_arg key_arg ctr_arg n_arg () =
+type kind =
+    Rand
+  | Uniform of int
+
+
+let process rng_name_arg key_arg ctr_arg n_arg kind_arg () =
   let (let*) = Result.bind in
   let () = Logs.info (fun m -> m "%d draws of '%s' rng" n_arg rng_name_arg) in
   let () = Logs.info (fun m -> m "command line key: [%s]" @@ String.concat "," @@ List.map string_of_int key_arg) in
@@ -29,7 +34,8 @@ let process rng_name_arg key_arg ctr_arg n_arg () =
 
   let key_arg = if List.length key_arg > 0 then Some (Array.of_list key_arg) else None in
   let ctr_arg = if List.length ctr_arg > 0 then Some (Array.of_list ctr_arg) else None in
-  let n_arg = max n_arg 1 in
+  let kind = Option.(map (fun upper -> Uniform upper) kind_arg |> value ~default:Rand) in
+  let n = max n_arg 1 in
 
   (* default key/ctr values *)
   let key2 = [|0;1|] in
@@ -37,31 +43,31 @@ let process rng_name_arg key_arg ctr_arg n_arg () =
   let ctr2 = [|0;1|] in
   let ctr4 = [|0;1;2;3|] in
 
-  let p ~rng_name_arg ?key_arg ?ctr_arg n () =
+  let p ~rng_name_arg ?key_arg ?ctr_arg n kind =
     let* {word_size; digits; algo} = R.RngName.of_string rng_name_arg in
     let rand ?key_arg ?ctr_arg = function
       | R.Word_size.ThirtyTwo, R.Digits.Two, R.Algo.Threefry -> Threefry_2x32.(
           let* key = counter @@ Option.value key_arg ~default:key2 in
           let* ctr = counter @@ Option.value ctr_arg ~default:ctr2 in
-          let* arr = rand ~key ~ctr in
+          let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
           Result.ok (to_string_array arr, incr ctr |> to_string_array)
         )
       | R.Word_size.ThirtyTwo, R.Digits.Four, R.Algo.Threefry -> Threefry_4x32.(
           let* key = counter @@ Option.value key_arg ~default:key4 in
           let* ctr = counter @@ Option.value ctr_arg ~default:ctr4 in
-          let* arr = rand ~key ~ctr in
+          let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
           Result.ok (to_string_array arr, incr ctr |> to_string_array)
         )
       | R.Word_size.SixtyFour, R.Digits.Two, R.Algo.Threefry -> Threefry_2x64.(
           let* key = counter @@ Option.value key_arg ~default:key2 in
           let* ctr = counter @@ Option.value ctr_arg ~default:ctr2 in
-          let* arr = rand ~key ~ctr in
+          let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
           Result.ok (to_string_array arr, incr ctr |> to_string_array)
         )
       | R.Word_size.SixtyFour, R.Digits.Four, R.Algo.Threefry -> Threefry_4x64.(
           let* key = counter @@ Option.value key_arg ~default:key4 in
           let* ctr = counter @@ Option.value ctr_arg ~default:ctr4 in
-          let* arr = rand ~key ~ctr in
+          let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
           Result.ok (to_string_array arr, incr ctr |> to_string_array)
         )
     in
@@ -104,11 +110,11 @@ let process rng_name_arg key_arg ctr_arg n_arg () =
     let arr = Array.sub arr 0 n in
     Result.ok (Array.iter (fun s -> Printf.printf "\n%s" s) arr; Printf.printf "\n")
   in
-  match p ~rng_name_arg ?key_arg ?ctr_arg n_arg () with
+  match p ~rng_name_arg ?key_arg ?ctr_arg n kind with
   | Result.Ok () -> `Ok ()
   | Result.Error e -> `Error (true, (Randii.Errors.to_string e))
 
-module Term = struct
+module Common = struct
   open Cmdliner
 
   let rng_name_arg =
@@ -135,7 +141,7 @@ module Term = struct
 
   let ctr_arg =
     let doc =
-      "The random generator starting ctr (optional). \
+      "The random generator starting counter (optional). \
        To be given in the form -c ctr1 -c ctr2 ...etc \
        depending on the digit size of the RNG you have specified.
       "
@@ -152,36 +158,88 @@ module Term = struct
     Arg.(
       value & opt int 2 & info ["n"] ~doc ~docv:"INT"
     )
+end
+
+module Raw = struct
+  open Cmdliner
 
   let term (setup_log:unit Term.t) =
     Cmdliner.Term.(
-      let t =
-        (const process $ rng_name_arg $ key_arg $ ctr_arg $ n_arg $ setup_log)
+      let t = const process
+              $ Common.rng_name_arg
+              $ Common.key_arg
+              $ Common.ctr_arg
+              $ Common.n_arg
+              $ const None
+              $ setup_log
       in
       ret t
     )
 
+  module Manpage = struct
+    let command_description =
+      "Generate raw random numbers - either 32bit or 64bit ints"
+
+    let description = [`S "DESCRIPTION"; `P command_description]
+
+    let man = description
+
+    let info = Cmdliner.Cmd.info ~doc:command_description ~man "rand"
+  end
+
+  let cmd setup_log = Cmdliner.Cmd.v Manpage.info @@ term setup_log
+
 end
 
-module Manpage = struct
-  let command_description =
-    "Generate random numbers"
 
-  let description = [`S "DESCRIPTION"; `P command_description]
+module Uniform = struct
+  open Cmdliner
 
-  let man = description
+  let uniform_arg =
+    let doc =
+      "A flag to specify the uniform distribution capped at an upper value (optional). \
+       To be given in the form --uniform VAL \
+      "
+    in
+    Arg.(
+      value & opt (some int) None & info ["uniform"] ~doc ~docv:"INT"
+    )
 
-  let info = Cmdliner.Cmd.info ~doc:command_description ~man "gen"
+  let term (setup_log:unit Term.t) =
+    Cmdliner.Term.(
+      let t = const process
+              $ Common.rng_name_arg
+              $ Common.key_arg
+              $ Common.ctr_arg
+              $ Common.n_arg
+              $ uniform_arg
+              $ setup_log
+      in
+      ret t
+    )
+
+  module Manpage = struct
+    let command_description =
+      "Generate uniform random numbers between [0, upper]"
+
+    let description = [`S "DESCRIPTION"; `P command_description]
+
+    let man = description
+
+    let info = Cmdliner.Cmd.info ~doc:command_description ~man "uniform"
+  end
+
+  let cmd setup_log = Cmdliner.Cmd.v Manpage.info @@ term setup_log
+
 end
-
-let cmd setup_log = Cmdliner.Cmd.v Manpage.info @@ Term.term setup_log
 
 (* group together all cmd lines *)
 let commands = [
-  cmd setup_log;
+  Raw.cmd setup_log;
+  Uniform.cmd setup_log;
 ]
 
-let info = info ~doc:"The randii random number generator" "randii"
+let info = info ~doc:"The randii random number generator, based on DEShaw Research 'Random123' counter-based random number generator" "randii"
 
 let main_cmd =
   Cmdliner.Cmd.group info commands
