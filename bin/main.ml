@@ -19,6 +19,7 @@ let info ~doc name =
 
 let process rng_name_arg () =
   let (let*) = Result.bind in
+  let () = Logs.info (fun m -> m "rng with '%s'" rng_name_arg) in
   let key2 = [|"0";"1"|] in
   let key4 = [|"0";"1";"2";"3"|] in
   let ctr2 = [|"2";"3"|] in
