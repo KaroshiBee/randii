@@ -1,11 +1,16 @@
 module R = Randii.Rng
-module C = Randii.Ctr
-module T = Randii.Threefry
+(* module C = Randii.Ctr *)
+(* module T = Randii.Threefry *)
 
-module Ctr2x32 = C.Make_ctr(T.UInt32_2_T)
-module Ctr2x64 = C.Make_ctr(T.UInt64_2_T)
-module Ctr4x32 = C.Make_ctr(T.UInt32_4_T)
-module Ctr4x64 = C.Make_ctr(T.UInt64_4_T)
+(* module Ctr2x32 = C.Make_ctr(T.UInt32_2_T) *)
+(* module Ctr2x64 = C.Make_ctr(T.UInt64_2_T) *)
+(* module Ctr4x32 = C.Make_ctr(T.UInt32_4_T) *)
+(* module Ctr4x64 = C.Make_ctr(T.UInt64_4_T) *)
+
+module Threefry_2x32 = Randii.Rng.Threefry_2x32
+module Threefry_2x64 = Randii.Rng.Threefry_2x64
+module Threefry_4x32 = Randii.Rng.Threefry_4x32
+module Threefry_4x64 = Randii.Rng.Threefry_4x64
 
 (* a generic setup for logging *)
 let setup_log =
@@ -27,70 +32,78 @@ let info ~doc name =
 let process rng_name_arg key_arg ctr_arg n_arg () =
   let (let*) = Result.bind in
   let () = Logs.info (fun m -> m "%d draws of '%s' rng" n_arg rng_name_arg) in
-  let () = Logs.info (fun m -> m "command line key: [%s]" @@ String.concat "," key_arg) in
-  let () = Logs.info (fun m -> m "command line ctr: [%s]" @@ String.concat "," ctr_arg) in
+  let () = Logs.info (fun m -> m "command line key: [%s]" @@ String.concat "," @@ List.map string_of_int key_arg) in
+  let () = Logs.info (fun m -> m "command line ctr: [%s]" @@ String.concat "," @@ List.map string_of_int ctr_arg) in
 
   let key_arg = if List.length key_arg > 0 then Some (Array.of_list key_arg) else None in
   let ctr_arg = if List.length ctr_arg > 0 then Some (Array.of_list ctr_arg) else None in
   let n_arg = max n_arg 1 in
 
   (* default key/ctr values *)
-  let key2 = [|"0";"1"|] in
-  let key4 = [|"0";"1";"2";"3"|] in
-  let ctr2 = [|"0";"1"|] in
-  let ctr4 = [|"0";"1";"2";"3"|] in
+  let key2 = [|0;1|] in
+  let key4 = [|0;1;2;3|] in
+  let ctr2 = [|0;1|] in
+  let ctr4 = [|0;1;2;3|] in
 
   let p ~rng_name_arg ?key_arg ?ctr_arg n () =
     let* {word_size; digits; algo} = R.RngName.of_string rng_name_arg in
     let rand ?key_arg ?ctr_arg = function
-      | R.Word_size.ThirtyTwo, R.Digits.Two, R.Algo.Threefry ->
-        let r = R.R2x32.rand in
-        let key = Array.map R.I32.of_string @@ Option.value key_arg ~default:key2 in
-        let ctr = Array.map R.I32.of_string @@ Option.value ctr_arg ~default:ctr2 in
-        r key ctr |> Array.map R.I32.to_string, ctr |> Array.map R.I32.to_string
-      | R.Word_size.ThirtyTwo, R.Digits.Four, R.Algo.Threefry ->
-        let r = R.R4x32.rand in
-        let key = Array.map R.I32.of_string @@ Option.value key_arg ~default:key4 in
-        let ctr = Array.map R.I32.of_string @@ Option.value ctr_arg ~default:ctr4 in
-        r key ctr |> Array.map R.I32.to_string, ctr |> Array.map R.I32.to_string
-      | R.Word_size.SixtyFour, R.Digits.Two, R.Algo.Threefry ->
-        let r = R.R2x64.rand in
-        let key = Array.map R.I64.of_string @@ Option.value key_arg ~default:key2 in
-        let ctr = Array.map R.I64.of_string @@ Option.value ctr_arg ~default:ctr2 in
-        r key ctr |> Array.map R.I64.to_string, ctr |> Array.map R.I64.to_string
-      | R.Word_size.SixtyFour, R.Digits.Four, R.Algo.Threefry ->
-        let r = R.R4x64.rand in
-        let key = Array.map R.I64.of_string @@ Option.value key_arg ~default:key4 in
-        let ctr = Array.map R.I64.of_string @@ Option.value ctr_arg ~default:ctr4 in
-        r key ctr |> Array.map R.I64.to_string, ctr |> Array.map R.I64.to_string
+      | R.Word_size.ThirtyTwo, R.Digits.Two, R.Algo.Threefry -> Threefry_2x32.(
+          let* key = counter @@ Option.value key_arg ~default:key2 in
+          let* ctr = counter @@ Option.value ctr_arg ~default:ctr2 in
+          let* arr = rand ~key ~ctr in
+          Result.ok (to_string_array arr, incr ctr |> to_string_array)
+        )
+      | R.Word_size.ThirtyTwo, R.Digits.Four, R.Algo.Threefry -> Threefry_4x32.(
+          let* key = counter @@ Option.value key_arg ~default:key4 in
+          let* ctr = counter @@ Option.value ctr_arg ~default:ctr4 in
+          let* arr = rand ~key ~ctr in
+          Result.ok (to_string_array arr, incr ctr |> to_string_array)
+        )
+      | R.Word_size.SixtyFour, R.Digits.Two, R.Algo.Threefry -> Threefry_2x64.(
+          let* key = counter @@ Option.value key_arg ~default:key2 in
+          let* ctr = counter @@ Option.value ctr_arg ~default:ctr2 in
+          let* arr = rand ~key ~ctr in
+          Result.ok (to_string_array arr, incr ctr |> to_string_array)
+        )
+      | R.Word_size.SixtyFour, R.Digits.Four, R.Algo.Threefry -> Threefry_4x64.(
+          let* key = counter @@ Option.value key_arg ~default:key4 in
+          let* ctr = counter @@ Option.value ctr_arg ~default:ctr4 in
+          let* arr = rand ~key ~ctr in
+          Result.ok (to_string_array arr, incr ctr |> to_string_array)
+        )
     in
     let rec aux :
-      ?key_arg:string array
-      -> ?ctr_arg:string array
+      ?key_arg:int array
+      -> ?ctr_arg:int array
       -> int
       -> string array list
       -> (string array list, Randii.Errors.t) result
       = fun ?key_arg ?ctr_arg i acc ->
         if i > 0 then
-          let arr, ctr = rand ?key_arg ?ctr_arg (word_size, digits, algo) in
+          let* arr, ctr = rand ?key_arg ?ctr_arg (word_size, digits, algo) in
           let m = Array.length arr in
           match (word_size, digits, algo) with
-          | R.Word_size.ThirtyTwo, R.Digits.Two, R.Algo.Threefry ->
-            let* c = ctr |> Array.map R.I32.of_string |> Ctr2x32.of_array in
-            let ctr_arg = Option.some @@ Ctr2x32.(succ c |> to_string_array) in
-            aux ?key_arg ?ctr_arg (i-m) (arr :: acc)
-          | R.Word_size.ThirtyTwo, R.Digits.Four, R.Algo.Threefry ->
-            let* c = Ctr4x32.of_array (ctr |> Array.map R.I32.of_string) in
-            let ctr_arg = Option.some @@ Ctr4x32.(succ c |> to_string_array) in
-            aux ?key_arg ?ctr_arg (i-m) (arr :: acc)
-          | R.Word_size.SixtyFour, R.Digits.Two, R.Algo.Threefry ->
-            let* c = Ctr2x64.of_array (ctr |> Array.map R.I64.of_string) in
-            let ctr_arg = Option.some @@ Ctr2x64.(succ c |> to_string_array) in
-            aux ?key_arg ?ctr_arg (i-m) (arr :: acc)
-          | R.Word_size.SixtyFour, R.Digits.Four, R.Algo.Threefry ->
-            let* c = Ctr4x64.of_array (ctr |> Array.map R.I64.of_string) in
-            let ctr_arg = Option.some @@ Ctr4x64.(succ c |> to_string_array) in
-            aux ?key_arg ?ctr_arg (i-m) (arr :: acc)
+          | R.Word_size.ThirtyTwo, R.Digits.Two, R.Algo.Threefry -> Threefry_2x32.(
+              let* c = of_string_array ctr in
+              let ctr_arg = Option.some @@ to_array c in
+              aux ?key_arg ?ctr_arg (i-m) (arr :: acc)
+            )
+          | R.Word_size.ThirtyTwo, R.Digits.Four, R.Algo.Threefry -> Threefry_4x32.(
+              let* c = of_string_array ctr in
+              let ctr_arg = Option.some @@ to_array c in
+              aux ?key_arg ?ctr_arg (i-m) (arr :: acc)
+            )
+          | R.Word_size.SixtyFour, R.Digits.Two, R.Algo.Threefry -> Threefry_2x64.(
+              let* c = of_string_array ctr in
+              let ctr_arg = Option.some @@ to_array c in
+              aux ?key_arg ?ctr_arg (i-m) (arr :: acc)
+            )
+          | R.Word_size.SixtyFour, R.Digits.Four, R.Algo.Threefry -> Threefry_4x64.(
+              let* c = of_string_array ctr in
+              let ctr_arg = Option.some @@ to_array c in
+              aux ?key_arg ?ctr_arg (i-m) (arr :: acc)
+            )
         else
           Result.ok @@ List.rev acc
     in
@@ -125,7 +138,7 @@ module Term = struct
       "
     in
     Arg.(
-      value & opt_all string [] & info ["k"] ~doc ~docv:"INT"
+      value & opt_all int [] & info ["k"] ~doc ~docv:"INT"
     )
 
   let ctr_arg =
@@ -136,7 +149,7 @@ module Term = struct
       "
     in
     Arg.(
-      value & opt_all string [] & info ["c"] ~doc ~docv:"INT"
+      value & opt_all int [] & info ["c"] ~doc ~docv:"INT"
     )
 
   let n_arg =

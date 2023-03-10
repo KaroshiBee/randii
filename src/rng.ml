@@ -26,74 +26,103 @@ module Maker_
     try
       (* find first rand less than limit
        * and do the remainder with that number
-       * throws if no number is found *)
+       * error if no number is found *)
       Array.to_list r
-      |> List.find_opt (fun x -> x <= limit upper)
-      |> Option.map (fun x -> U.rem x upper)
-      |> Option.get
-      |> Result.ok
+      |> List.filter (fun x -> x <= limit upper)
+      |> List.map (fun x -> U.rem x upper)
+      |> Array.of_list
+      |> Ctr.of_array
     with
     | Invalid_argument _ -> Result.error @@ `Error (Printf.sprintf "Bad ctr/key pair for given ~upper:%s" @@ U.to_string upper)
 
-  let discrete2 ~(upper:U.t) key ctr =
-    if U.equal U.zero upper then Result.ok U.zero else
+  let rand2 ~key ~ctr =
+    match (Ctr.digits ctr, Ctr.digits key) with
+    | (Two, Two) ->
+      Rng.rand (Ctr.data key) (Ctr.data ctr)
+      |> Ctr.of_array
+    | _ -> Result.error @@ `Error "Need two digit ctr/key"
+
+  let uniform2 ~(upper:int) ~key ~ctr =
+    let upper = U.of_int upper in
+    if U.equal U.zero upper then Result.error @@ `Error "zero upper" else
       match (Ctr.digits ctr, Ctr.digits key) with
-      | (Two, Two) -> (
-          Rng.rand (Ctr.data key) (Ctr.data ctr)
-          |> unbiased upper
-        )
+      | (Two, Two) ->
+        Rng.rand (Ctr.data key) (Ctr.data ctr)
+        |> unbiased upper
       | _ -> Result.error @@ `Error "Need two digit ctr/key"
 
-  let discrete4 ~(upper:U.t) key ctr =
-    if U.equal U.zero upper then Result.ok U.zero else
+  let rand4 ~key ~ctr =
+    match (Ctr.digits ctr, Ctr.digits key) with
+    | (Four, Four) ->
+      Rng.rand (Ctr.data key) (Ctr.data ctr)
+      |> Ctr.of_array
+    | _ -> Result.error @@ `Error "Need four digit ctr/key"
+
+  let uniform4 ~(upper:int) ~key ~ctr =
+    let upper = U.of_int upper in
+    if U.equal U.zero upper then Result.error @@ `Error "zero upper" else
       match (Ctr.digits ctr, Ctr.digits key) with
-      | (Four, Four) -> (
-          Rng.rand (Ctr.data key) (Ctr.data ctr)
-          |> unbiased upper
-        )
+      | (Four, Four) ->
+        Rng.rand (Ctr.data key) (Ctr.data ctr)
+        |> unbiased upper
       | _ -> Result.error @@ `Error "Need four digit ctr/key"
 
 end
 
-module type UNIFORM_DISCRETE = sig
+module type DISCRETE = sig
   type t
-  type ctr
-  val uniform : upper:t -> ctr -> ctr -> t
+  val counter : int array -> (t, Errors.t) Result.t
+  val incr : t -> t
+
+  val rand : key:t -> ctr:t -> (t, Errors.t) Result.t
+  val uniform : upper:int -> key:t -> ctr:t -> (t, Errors.t) Result.t
+  val to_array : t -> int array
+  val to_string_array : t -> string array
+  val of_string_array : string array -> (t, Errors.t) Result.t
 end
 
-module Make_uniform2xW (U:Threefry.T2) = struct
+module Make_discrete2xW (U:Threefry.T2) : DISCRETE = struct
 
   module Ctr = Ctr.Make_ctr(U)
   module Rng = Threefry.Make_threefry2xW(U)
 
   open Maker_(U) (Ctr) (Rng)
 
-  let discrete = discrete2
+  type t = Ctr.t
+
+  let counter xs = Array.map U.of_int xs |> Ctr.of_array
+  let incr = Ctr.succ
+
+  let rand = rand2
+  let uniform = uniform2
+  let to_array t = Ctr.to_array t |> Array.map U.to_int
+  let to_string_array = Ctr.to_string_array
+  let of_string_array t = Array.map U.of_string t |> Ctr.of_array
 end
 
-module Make_uniform4xW (U:Threefry.T4) = struct
+module Make_discrete4xW (U:Threefry.T4) : DISCRETE = struct
 
   module Ctr = Ctr.Make_ctr(U)
   module Rng = Threefry.Make_threefry4xW(U)
 
   open Maker_(U) (Ctr) (Rng)
 
-  let discrete = discrete4
+  type t = Ctr.t
 
+  let counter xs = Array.map U.of_int xs |> Ctr.of_array
+  let incr = Ctr.succ
+
+  let rand = rand4
+  let uniform = uniform4
+  let to_array t = Ctr.to_array t |> Array.map U.to_int
+  let to_string_array = Ctr.to_string_array
+  let of_string_array t = Array.map U.of_string t |> Ctr.of_array
 end
 
-module R2x32 = Threefry.Make_threefry2xW(Threefry.UInt32_2_T)
-module R2x64 = Threefry.Make_threefry2xW(Threefry.UInt64_2_T)
-module U2x32 = Make_uniform2xW(Threefry.UInt32_2_T)
-module U2x64 = Make_uniform2xW(Threefry.UInt64_2_T)
-
-module R4x32 = Threefry.Make_threefry4xW(Threefry.UInt32_4_T)
-module R4x64 = Threefry.Make_threefry4xW(Threefry.UInt64_4_T)
-module U4x32 = Make_uniform4xW(Threefry.UInt32_4_T)
-module U4x64 = Make_uniform4xW(Threefry.UInt64_4_T)
-
-module I32 = Unsigned.UInt32
-module I64 = Unsigned.UInt64
+module Threefry_2x32 = Make_discrete2xW(Threefry.UInt32_2_T)
+module Threefry_2x64 = Make_discrete2xW(Threefry.UInt64_2_T)
+module Threefry_4x32 = Make_discrete4xW(Threefry.UInt32_4_T)
+module Threefry_4x64 = Make_discrete4xW(Threefry.UInt64_4_T)
 
 module Word_size = struct
   type t = | ThirtyTwo | SixtyFour

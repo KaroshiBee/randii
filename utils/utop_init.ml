@@ -1,10 +1,7 @@
-open Unsigned.UInt64
+module R = Randii.Rng.Threefry_4x64
 
-module R = Randii.Rng.U4x64
-module Ctr = R.Ctr
+let key = [| 0; 0; 0; 0; |] |> R.counter |> Result.get_ok
+let ctr = [| 1; 0; 0; 0; |] |> R.counter |> Result.get_ok
 
-let zs = [|zero; zero; zero; zero; |] |> Ctr.of_array |> Result.get_ok
-let ky = Ctr.copy zs
-let ctr = Ctr.copy zs
-
-let u = R.discrete ~upper:(of_int 10)
+let r = R.rand
+let u = R.uniform ~upper:10
