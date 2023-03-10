@@ -241,7 +241,11 @@ let commands = [
   Uniform.cmd setup_log;
 ]
 
-let info = info ~doc:"The randii random number generator, based on DEShaw Research 'Random123' counter-based random number generator" "randii"
+let info =
+  info ~doc:"The randii random number generator, \
+             based on DEShaw Research 'Random123' \
+             counter-based random number generator"
+    "randii"
 
 let main_cmd =
   Cmdliner.Cmd.group info commands
