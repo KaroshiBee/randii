@@ -1,0 +1,19 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: 'randii'
+type: software
+authors:
+  - given-names: Simon
+    family-names: Parry
+    email: simon.parry@karoshibee.com
+    affiliation: 'Karoshibee Ltd'
+repository-code: 'https://github.com/karoshibee/randii.git'
+abstract: >-
+  A pure OCaml implementation of the Threefry random number generator from DEShaw Research
+keywords:
+  - random123
+  - prng
+  - ocaml
+license: MIT
