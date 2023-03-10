@@ -9,10 +9,11 @@ maintainer: ["simon.parry@karoshibee.com"]
 authors: ["Simon Parry"]
 license: "MIT"
 homepage: "https://github.com/KaroshiBee/randii"
+doc: "https://github.com/KaroshiBee/randii"
 bug-reports: "https://github.com/KaroshiBee/randii/issues"
 depends: [
   "integers" {>= "0.4.0"}
-  "dune" {>= "2.8" & > "1.5"}
+  "dune" {>= "3.0" & > "1.5"}
   "alcotest" {with-test}
   "zarith" {with-test & >= "1.12"}
   "bisect_ppx" {with-test & >= "2.6.0"}

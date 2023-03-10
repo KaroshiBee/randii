@@ -5,9 +5,9 @@ module Ctr_test (I:Randii.Threefry.T) = struct
   let test_of_array () =
     let z = I.zero in
     let o = I.one in
-    let eg1 = [|o|] |> C.of_array in
+    let eg1 = [|o|] |> C.of_array |> Result.get_ok in
     let eg2 = [|o;z|] |> Array.map I.to_string in
-    let eg3 = [|o;z;z|] |> C.of_array in
+    let eg3 = [|o;z;z|] |> C.of_array |> Result.get_ok in
     let eg4 = [|o;z;z;z|] |> Array.map I.to_string in
     Alcotest.(check (array string))
       "various constructors 1/2"
@@ -19,7 +19,7 @@ module Ctr_test (I:Randii.Threefry.T) = struct
 
   let test_succ () =
     let z = I.zero in
-    let zs = [|z;z;z;z|] |> C.of_array in
+    let zs = [|z;z;z;z|] |> C.of_array |> Result.get_ok in
     let expected = [|I.one;z;z;z|] |> Array.map I.to_string in
     let zs = C.succ zs in
     let actual = C.to_string_array zs in
@@ -30,7 +30,7 @@ module Ctr_test (I:Randii.Threefry.T) = struct
   let test_succ_rollover () =
     let z = I.zero in
     let m = I.max_int in
-    let ms = [|m;m;m;m|] |> C.of_array in
+    let ms = [|m;m;m;m|] |> C.of_array |> Result.get_ok in
     let expected = [|z;z;z;z|] |> Array.map I.to_string in
     let ms = C.succ ms in
     let actual = C.to_string_array ms in
@@ -40,7 +40,7 @@ module Ctr_test (I:Randii.Threefry.T) = struct
 
   let test_pred () =
     let z = I.zero in
-    let zs = [|I.one;z;z;z|] |> C.of_array in
+    let zs = [|I.one;z;z;z|] |> C.of_array |> Result.get_ok in
     let expected = [|z;z;z;z|] |> Array.map I.to_string in
     let zs = C.pred zs in
     let actual = C.to_string_array zs in
@@ -50,7 +50,7 @@ module Ctr_test (I:Randii.Threefry.T) = struct
 
   let test_pred_rollover () =
     let z = I.zero in
-    let zs = [|z;z;z;z|] |> C.of_array in
+    let zs = [|z;z;z;z|] |> C.of_array |> Result.get_ok in
     let m = I.max_int in
     let expected = [|m;m;m;m|] |> Array.map I.to_string in
     let zs = C.pred zs in
@@ -61,14 +61,16 @@ module Ctr_test (I:Randii.Threefry.T) = struct
 
   let test_failure_0 () =
     let zs = [||] in
-    Alcotest.(check_raises "no data" (Invalid_argument "No data")
-                (fun () -> let _ = C.of_array zs in ()))
+    match C.of_array zs with
+    | Result.Error `No_data -> ()
+    | _ -> Alcotest.failf "Expected no data"
 
   let test_failure_too_big () =
     let z = I.zero in
     let zs = [|z;z;z;z;z|] in
-    Alcotest.(check_raises "no data" (Invalid_argument "Too large")
-                (fun () -> let _ = C.of_array zs in ()))
+    match C.of_array zs with
+    | Result.Error `Too_large 5 -> ()
+    | _ -> Alcotest.failf "Expected too large"
 
 end
 

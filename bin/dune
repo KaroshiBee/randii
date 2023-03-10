@@ -1,4 +1,14 @@
 (executable
  (name main)
  (public_name randii)
- (libraries randii))
+ (libraries
+   utils
+   randii
+   cmdliner
+   fmt
+   fmt.tty
+   fmt.cli
+   logs
+   logs.fmt
+   logs.cli
+))

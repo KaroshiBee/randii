@@ -14,81 +14,10 @@ module R4x64 = Randii.Threefry.Make_threefry4xW_TEST(U4x64)
 module I32 = Unsigned.UInt32
 module I64 = Unsigned.UInt64
 
-module Word_size = struct
-  type t = | ThirtyTwo | SixtyFour
-
-  let of_string = function
-    | "32" -> ThirtyTwo
-    | "64" -> SixtyFour
-    | _ -> raise (Invalid_argument "Unknown word size")
-
-  let to_string = function
-    | ThirtyTwo -> "32"
-    | SixtyFour -> "64"
-
-  let length = function
-    | ThirtyTwo | SixtyFour -> 2
-
-end
-
-module Digits = struct
-  type t = | Two | Four
-
-  let of_string = function
-    | "2" -> Two
-    | "4" -> Four
-    | _ -> raise (Invalid_argument "Unknown digits")
-
-  let to_string = function
-    | Two -> "2"
-    | Four -> "4"
-
-  let length = function
-    | Two -> 2
-    | Four -> 4
-
-end
-
-module Algo = struct
-  type t = | Threefry
-
-  let of_string = function
-    | "threefry" -> Threefry
-    | _ -> raise (Invalid_argument "Unknown algo")
-
-  let to_string = function
-    | Threefry -> "threefry"
-
-  let length t = to_string t |> String.length
-
-end
-
-module RngName = struct
-
-  type t = {
-    word_size:Word_size.t;
-    digits:Digits.t;
-    algo:Algo.t;
-  }
-
-  let of_string s =
-    match (String.lowercase_ascii s |> String.split_on_char 'x') with
-    | [left; right] ->
-      let word_size = Word_size.of_string right in
-      let n = Algo.(Threefry |> length) in
-      let algo = String.sub left 0 n |> Algo.of_string in
-      let digits = String.sub left n 1 |> Digits.of_string in
-      {word_size; digits; algo}
-    | _ -> raise (Invalid_argument "Unknown generator")
-
-  let to_string {word_size; digits; algo} =
-    Algo.to_string algo ^
-    Digits.to_string digits ^ "x" ^
-    Word_size.to_string word_size
-
-  let length t = to_string t |> String.length
-
-end
+module Word_size = Randii.Rng.Word_size
+module Digits = Randii.Rng.Digits
+module Algo = Randii.Rng.Algo
+module RngName = Randii.Rng.RngName
 
 module RngData = struct
   type t = {
@@ -106,20 +35,21 @@ module RngData = struct
   let _read_hex s = "0x" ^ s |> Z.of_string |> Z.to_string
 
   let of_string s =
+    let (let*) = Result.bind in
     let parts = String.split_on_char ' ' s
                 |> List.map String.trim
                 |> List.filter (fun ss -> String.length ss > 0)
                 |> Array.of_list
     in
-    let name = parts.(0) |> RngName.of_string in
+    let* name = parts.(0) |> RngName.of_string in
     let nrounds = parts.(1) |> int_of_string in
     let n = Digits.length name.digits in
     let ctr = Array.sub parts 2 n |> Array.map _read_hex in
     let key = Array.sub parts (2+n) n |> Array.map _read_hex in
     let expected = Array.sub parts (2+n+n) n |> Array.map _read_hex in
-    {name; nrounds; ctr; key; expected}
+    Result.ok {name; nrounds; ctr; key; expected}
 
-  let to_string {name; nrounds; ctr; key; expected} =
+  let _to_string {name; nrounds; ctr; key; expected} =
     Array.concat [
       [| RngName.to_string name; string_of_int nrounds |];
       ctr;
@@ -132,6 +62,7 @@ module RngData = struct
 end
 
 let read_lines name : string list =
+  let () = Logs.info (fun m -> m "reading KAT file: %s" name) in
   let ic = open_in name in
   let try_read () =
     try Some (input_line ic) with End_of_file -> None in
@@ -141,13 +72,9 @@ let read_lines name : string list =
   loop []
 
 let read_kat_data ln =
-  try
-    Some (RngData.of_string ln)
-  with Invalid_argument s -> match s with
-    | "Unknown generator" -> None
-    | s ->
-      Printf.printf "ERROR: %s\n" s;
-      None
+  match RngData.of_string ln with
+  | Result.Ok v -> Some v
+  | Result.Error e -> let () = Logs.warn (fun m -> m "Error: %s\nLine: %s" (Randii.Errors.to_string e) ln) in None
 
 let test_kat_data i rng_data () =
   let RngData.{name; nrounds; ctr; key; expected} = rng_data in

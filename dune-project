@@ -1,6 +1,6 @@
-(lang dune 2.8)
+(lang dune 3.0)
 (name randii)
-(version 1.0.0)
+(version 1.0.0) ;; TODO make sure same as in Utils.Version
 
 (generate_opam_files true)
 
@@ -8,6 +8,7 @@
 (license MIT)
 (authors "Simon Parry")
 (maintainers "simon.parry@karoshibee.com")
+(documentation "https://github.com/KaroshiBee/randii")
 
 (package
  (name randii)
