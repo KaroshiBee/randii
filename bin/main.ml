@@ -32,7 +32,8 @@ let process rng_name_arg key_arg ctr_arg n_arg kind_arg () =
   let kind = Option.(map (fun upper -> Uniform upper) kind_arg |> value ~default:Rand) in
   let n = max n_arg 1 in
 
-  let () = Logs.info (fun m -> m "%d draws of '%s.%s' rng" n rng_name_arg (match kind with Rand -> "rand" | Uniform i -> "uniform "^(string_of_int i))) in
+  let () = Logs.info (fun m -> m "%d draws of '%s.%s' rng" n rng_name_arg
+                         (match kind with Rand -> "rand" | Uniform i -> "uniform "^(string_of_int i))) in
   let () = Logs.info (fun m -> m "command line key: [%s]" @@ String.concat "," @@ List.map string_of_int key_arg) in
   let () = Logs.info (fun m -> m "command line ctr: [%s]" @@ String.concat "," @@ List.map string_of_int ctr_arg) in
 
