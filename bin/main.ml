@@ -28,14 +28,16 @@ type kind =
 
 let process rng_name_arg key_arg ctr_arg n_arg kind_arg () =
   let (let*) = Result.bind in
-  let () = Logs.info (fun m -> m "%d draws of '%s' rng" n_arg rng_name_arg) in
+
+  let kind = Option.(map (fun upper -> Uniform upper) kind_arg |> value ~default:Rand) in
+  let n = max n_arg 1 in
+
+  let () = Logs.info (fun m -> m "%d draws of '%s.%s' rng" n rng_name_arg (match kind with Rand -> "rand" | Uniform i -> "uniform "^(string_of_int i))) in
   let () = Logs.info (fun m -> m "command line key: [%s]" @@ String.concat "," @@ List.map string_of_int key_arg) in
   let () = Logs.info (fun m -> m "command line ctr: [%s]" @@ String.concat "," @@ List.map string_of_int ctr_arg) in
 
   let key_arg = if List.length key_arg > 0 then Some (Array.of_list key_arg) else None in
   let ctr_arg = if List.length ctr_arg > 0 then Some (Array.of_list ctr_arg) else None in
-  let kind = Option.(map (fun upper -> Uniform upper) kind_arg |> value ~default:Rand) in
-  let n = max n_arg 1 in
 
   (* default key/ctr values *)
   let key2 = [|0;1|] in
@@ -202,7 +204,7 @@ module Uniform = struct
       "
     in
     Arg.(
-      value & opt (some int) None & info ["uniform"] ~doc ~docv:"INT"
+      value & opt (some int) (Some 10) & info ["uniform"] ~doc ~docv:"INT"
     )
 
   let term (setup_log:unit Term.t) =
