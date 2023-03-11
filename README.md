@@ -17,7 +17,6 @@ $ randii --help
 
 for more information.
 
-`
 The test suite uses Known Answer Tests from the test suite of the
 [original implementation](https://github.com/DEShawResearch/random123/tree/main/tests) - specifically the `Threefry` data in `kat_vectors` and `old_kat_vectors`.
 
