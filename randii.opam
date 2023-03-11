@@ -12,6 +12,9 @@ homepage: "https://github.com/KaroshiBee/randii"
 doc: "https://github.com/KaroshiBee/randii"
 bug-reports: "https://github.com/KaroshiBee/randii/issues"
 depends: [
+  "logs"
+  "cmdliner"
+  "fmt"
   "integers" {>= "0.4.0"}
   "dune" {>= "3.0" & > "1.5"}
   "alcotest" {with-test}
