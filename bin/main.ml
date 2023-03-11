@@ -201,11 +201,10 @@ module Uniform = struct
   let uniform_arg =
     let doc =
       "A flag to specify the uniform distribution capped at an upper value (optional). \
-       To be given in the form --uniform VAL \
       "
     in
     Arg.(
-      value & opt (some int) (Some 10) & info ["uniform"] ~doc ~docv:"INT"
+      value & opt (some int) (Some 10) & info ["upper"] ~doc ~docv:"INT"
     )
 
   let term (setup_log:unit Term.t) =
