@@ -15,9 +15,10 @@
  (synopsis "A pure OCaml port of the Random123 counter based random number generator")
  (description "Currently implements the Threefry 2&4 digit 32&64 bit random number generators")
  (depends
-  logs
-  cmdliner
-  fmt
+  (ocaml (>= 4.08))
+  (logs (>= 0.7.0))
+  (cmdliner (>= 1.1.1))
+  (fmt (>= 0.9.0))
   (integers (>= 0.4.0))
   (dune (> 1.5))
   (alcotest :with-test)

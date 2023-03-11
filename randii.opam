@@ -12,9 +12,10 @@ homepage: "https://github.com/KaroshiBee/randii"
 doc: "https://github.com/KaroshiBee/randii"
 bug-reports: "https://github.com/KaroshiBee/randii/issues"
 depends: [
-  "logs"
-  "cmdliner"
-  "fmt"
+  "ocaml" {>= "4.08"}
+  "logs" {>= "0.7.0"}
+  "cmdliner" {>= "1.1.1"}
+  "fmt" {>= "0.9.0"}
   "integers" {>= "0.4.0"}
   "dune" {>= "3.0" & > "1.5"}
   "alcotest" {with-test}
