@@ -280,12 +280,8 @@ module UInt64_4_T = struct
 
 end
 
-(*
- * NOTE needs to be unsigned int32 / int64
- * Probably need a module for ctr_t and key_t
- * to stop incorrect constructions and allow for incr operation
- *
- * NOTE also that this implementation swaps around the args key/ctr *)
+(* NOTE also that this implementation swaps around the args key/ctr
+   as compared to the original C implementation *)
 
 module type RAND_T = sig
   type ctr_t
