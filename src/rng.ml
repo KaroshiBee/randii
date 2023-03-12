@@ -29,9 +29,9 @@ module Maker_
        * error if no number is found *)
       Array.to_list r
       |> List.filter (fun x -> x <= limit upper)
-      |> List.map (fun x -> U.rem x upper)
+      |> List.map (fun x -> U.rem x upper |> U.to_string)
       |> Array.of_list
-      |> Ctr.of_array
+      |> Ctr.of_string_array
     with
     | Invalid_argument _ -> Result.error @@ `Error (Printf.sprintf "Bad ctr/key pair for given ~upper:%s" @@ U.to_string upper)
 
@@ -39,7 +39,8 @@ module Maker_
     match (Ctr.digits ctr, Ctr.digits key) with
     | (Two, Two) ->
       Rng.rand (Ctr.data key) (Ctr.data ctr)
-      |> Ctr.of_array
+      |> Array.map U.to_string
+      |> Ctr.of_string_array
     | _ -> Result.error @@ `Error "Need two digit ctr/key"
 
   let uniform2 ~(upper:int) ~key ~ctr =
@@ -55,7 +56,8 @@ module Maker_
     match (Ctr.digits ctr, Ctr.digits key) with
     | (Four, Four) ->
       Rng.rand (Ctr.data key) (Ctr.data ctr)
-      |> Ctr.of_array
+      |> Array.map U.to_string
+      |> Ctr.of_string_array
     | _ -> Result.error @@ `Error "Need four digit ctr/key"
 
   let uniform4 ~(upper:int) ~key ~ctr =
@@ -71,12 +73,11 @@ end
 
 module type DISCRETE = sig
   type t
-  val counter : int array -> (t, Errors.t) Result.t
-  val incr : t -> t
 
+  val incr : t -> t
   val rand : key:t -> ctr:t -> (t, Errors.t) Result.t
   val uniform : upper:int -> key:t -> ctr:t -> (t, Errors.t) Result.t
-  val to_array : t -> int array
+
   val to_string_array : t -> string array
   val of_string_array : string array -> (t, Errors.t) Result.t
 end
@@ -90,14 +91,12 @@ module Make_discrete2xW (U:Threefry.T2) : DISCRETE = struct
 
   type t = Ctr.t
 
-  let counter xs = Array.map U.of_int xs |> Ctr.of_array
   let incr = Ctr.succ
-
   let rand = rand2
   let uniform = uniform2
-  let to_array t = Ctr.to_array t |> Array.map U.to_int
+
   let to_string_array = Ctr.to_string_array
-  let of_string_array t = Array.map U.of_string t |> Ctr.of_array
+  let of_string_array = Ctr.of_string_array
 end
 
 module Make_discrete4xW (U:Threefry.T4) : DISCRETE = struct
@@ -109,14 +108,12 @@ module Make_discrete4xW (U:Threefry.T4) : DISCRETE = struct
 
   type t = Ctr.t
 
-  let counter xs = Array.map U.of_int xs |> Ctr.of_array
   let incr = Ctr.succ
-
   let rand = rand4
   let uniform = uniform4
-  let to_array t = Ctr.to_array t |> Array.map U.to_int
+
   let to_string_array = Ctr.to_string_array
-  let of_string_array t = Array.map U.of_string t |> Ctr.of_array
+  let of_string_array = Ctr.of_string_array
 end
 
 module Threefry_2x32 = Make_discrete2xW(Threefry.UInt32_2_T)

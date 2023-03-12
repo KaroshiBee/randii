@@ -3,8 +3,7 @@ type digits = | Two | Four
 module type CTR = sig
   type el
   type t
-  val of_array : el array -> (t, Errors.t) Result.t
-  val to_array : t -> el array
+  val of_string_array : string array -> (t, Errors.t) Result.t
   val to_string_array : t -> string array
   val copy : t -> t
   val succ : t -> t
@@ -20,16 +19,16 @@ module Make_ctr (U:Threefry.T) : (CTR with type el := U.t) = struct
     digits: digits
   }
 
-  let of_array data =
+  let of_string_array data =
     match Array.length data with
     | 0 -> Result.error `No_data
-    | 1 -> Result.Ok {data=Array.(append (copy data) [| U.zero |]); digits=Two}
-    | 2 -> Result.Ok {data=Array.copy data; digits=Two}
-    | 3 -> Result.Ok {data=Array.(append (copy data) [| U.zero |]); digits=Four}
-    | 4 -> Result.Ok {data=Array.copy data; digits=Four}
+    | 1 -> Result.Ok {data=Array.(append (copy data |> map U.of_string) [| U.zero |]); digits=Two}
+    | 2 -> Result.Ok {data=Array.(copy data |> map U.of_string); digits=Two}
+    | 3 -> Result.Ok {data=Array.(append (copy data |> map U.of_string) [| U.zero |]); digits=Four}
+    | 4 -> Result.Ok {data=Array.(copy data |> map U.of_string); digits=Four}
     | n -> Result.error @@ `Too_large n
-  let to_array {data; _} = Array.copy data
-  let to_string_array t = to_array t |> Array.map U.to_string
+
+  let to_string_array t = t.data |> Array.map U.to_string
 
   let copy {data; digits} = {data=Array.copy data; digits}
 
