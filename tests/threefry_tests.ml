@@ -36,12 +36,15 @@ let test_failure_4x64 () =
               (fun () -> let _ = R4x64_T.rand_R 100 zs zs in ()))
 
 let test_threefry2x32 () =
-  let expected = [|0x6b200159; 0x99ba4efe|] in
+  let expected = [|"0x6b200159"; "0x99ba4efe"|]
+                 |> Array.map Z.of_string
+                 |> Array.map Z.to_string
+  in
   let actual =
     let z = I32.zero in
     let zs = [|z;z|] in
-    R2x32.rand zs zs |> Array.map I32.to_int in
-  Alcotest.(check (array int))
+    R2x32.rand zs zs |> Array.map I32.to_string in
+  Alcotest.(check (array string))
     "Threefry2x32 with zeros input"
     expected actual
 
@@ -59,12 +62,15 @@ let test_threefry2x64 () =
     expected actual
 
 let test_threefry4x32 () =
-  let expected = [|0x9c6ca96a; 0xe17eae66; 0xfc10ecd4; 0x5256a7d8|] in
+  let expected = [|"0x9c6ca96a"; "0xe17eae66"; "0xfc10ecd4"; "0x5256a7d8"|]
+                 |> Array.map Z.of_string
+                 |> Array.map Z.to_string
+  in
   let actual =
     let z = I32.zero in
     let zs = [|z;z;z;z|] in
-    R4x32.rand zs zs |> Array.map I32.to_int in
-  Alcotest.(check (array int))
+    R4x32.rand zs zs |> Array.map I32.to_string in
+  Alcotest.(check (array string))
     "Threefry4x32 with zeros input"
     expected actual
 

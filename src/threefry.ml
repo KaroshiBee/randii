@@ -159,7 +159,7 @@ module UInt32_2_T = struct
   let _32 = 32 |> of_int
 
   (* #define SKEIN_KS_PARITY32         0x1BD11BDA *)
-  let skein_ks_parity = 0x1BD11BDA |> of_int
+  let skein_ks_parity = "0x1BD11BDA" |> of_string
 
   let rotations_0 = Consts.make
       of_int
