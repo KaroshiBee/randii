@@ -223,10 +223,9 @@ module UInt64_2_T = struct
 
   (* #define SKEIN_MK_64(hi32,lo32)  ((lo32) + (((uint64_t) (hi32)) << 32))
    * #define SKEIN_KS_PARITY64         SKEIN_MK_64(0x1BD11BDA,0xA9FC1A22) *)
-  (* convert hi32 to Int64, shift_left by 32, add to lo32 *)
   let skein_ks_parity =
-    let hi = 0x1BD11BDA |> of_int in
-    let lo = 0xA9FC1A22 |> of_int in
+    let hi = "0x1BD11BDA" |> of_string in
+    let lo = "0xA9FC1A22" |> of_string in
     add lo (shift_left hi 32)
 
   let rotations_0 = Consts.make
