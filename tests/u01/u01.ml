@@ -31,8 +31,3 @@ let next_2x32 i1 i2 =
 (* let rng_4x32 = Randii.Rng.(gen ~rng_name_arg:"threefry4x32" 4 Rand) *)
 (* let rng_4x64 = Randii.Rng.(gen ~rng_name_arg:"threefry4x64" 4 Rand) *)
 
-let () = Callback.register "rng_2x32" rng_2x32
-let () = Callback.register "next_2x32" next_2x32
-(* let () = Callback.register "rng_2x64" rng_2x64 *)
-(* let () = Callback.register "rng_4x32" rng_4x32 *)
-(* let () = Callback.register "rng_4x64" rng_4x64 *)
