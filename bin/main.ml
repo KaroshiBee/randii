@@ -21,15 +21,9 @@ let info ~doc name =
     ~version
     name
 
-type kind =
-    Rand
-  | Uniform of int
-
-
 let process rng_name_arg key_arg ctr_arg n_arg kind_arg () =
   let (let*) = Result.bind in
-
-  let kind = Option.(map (fun upper -> Uniform upper) kind_arg |> value ~default:Rand) in
+  let kind = Option.(map (fun upper -> R.Uniform upper) kind_arg |> value ~default:R.Rand) in
   let n = max n_arg 1 in
 
   let () = Logs.info (fun m -> m "%d draws of '%s.%s' rng" n rng_name_arg
@@ -40,61 +34,12 @@ let process rng_name_arg key_arg ctr_arg n_arg kind_arg () =
   let key_arg = if List.length key_arg > 0 then Some (Array.of_list key_arg) else None in
   let ctr_arg = if List.length ctr_arg > 0 then Some (Array.of_list ctr_arg) else None in
 
-  (* default key/ctr values *)
-  let key2 = [|"0";"1"|] in
-  let key4 = [|"0";"1";"2";"3"|] in
-  let ctr2 = [|"0";"1"|] in
-  let ctr4 = [|"0";"1";"2";"3"|] in
-
-  let p ~rng_name_arg ?key_arg ?ctr_arg n kind =
-    let* {word_size; digits; algo} = R.RngName.of_string rng_name_arg in
-    let rand ?key_arg ?ctr_arg = function
-      | R.Word_size.ThirtyTwo, R.Digits.Two, R.Algo.Threefry -> Threefry_2x32.(
-          let* key = of_string_array @@ Option.value key_arg ~default:key2 in
-          let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr2 in
-          let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
-          Result.ok (to_string_array arr, incr ctr |> to_string_array)
-        )
-      | R.Word_size.ThirtyTwo, R.Digits.Four, R.Algo.Threefry -> Threefry_4x32.(
-          let* key = of_string_array @@ Option.value key_arg ~default:key4 in
-          let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr4 in
-          let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
-          Result.ok (to_string_array arr, incr ctr |> to_string_array)
-        )
-      | R.Word_size.SixtyFour, R.Digits.Two, R.Algo.Threefry -> Threefry_2x64.(
-          let* key = of_string_array @@ Option.value key_arg ~default:key2 in
-          let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr2 in
-          let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
-          Result.ok (to_string_array arr, incr ctr |> to_string_array)
-        )
-      | R.Word_size.SixtyFour, R.Digits.Four, R.Algo.Threefry -> Threefry_4x64.(
-          let* key = of_string_array @@ Option.value key_arg ~default:key4 in
-          let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr4 in
-          let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
-          Result.ok (to_string_array arr, incr ctr |> to_string_array)
-        )
-    in
-    let rec aux :
-      ?key_arg:string array
-      -> ?ctr_arg:string array
-      -> int
-      -> string array list
-      -> (string array list, Randii.Errors.t) result
-      = fun ?key_arg ?ctr_arg i acc ->
-        if i > 0 then
-          let* arr, ctr = rand ?key_arg ?ctr_arg (word_size, digits, algo) in
-          let m = Array.length arr in
-          let ctr_arg = Option.some ctr in
-          aux ?key_arg ?ctr_arg (i-m) (arr :: acc)
-        else
-          Result.ok @@ List.rev acc
-    in
-    let* arr = aux ?key_arg ?ctr_arg n [] in
-    let arr = Array.concat arr in
-    let arr = Array.sub arr 0 n in
+  let p () =
+    let* arr = R.gen ~rng_name_arg ?key_arg ?ctr_arg n kind in
     Result.ok (Array.iter (fun s -> Printf.printf "\n%s" s) arr; Printf.printf "\n")
   in
-  match p ~rng_name_arg ?key_arg ?ctr_arg n kind with
+
+  match p () with
   | Result.Ok () -> `Ok ()
   | Result.Error e -> `Error (true, (Randii.Errors.to_string e))
 

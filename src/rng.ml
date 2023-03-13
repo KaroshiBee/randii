@@ -197,3 +197,62 @@ module RngName = struct
   let length t = to_string t |> String.length
 
 end
+
+type kind =
+    Rand
+  | Uniform of int
+
+
+let gen ~rng_name_arg ?key_arg ?ctr_arg n kind =
+  let (let*) = Result.bind in
+  (* default key/ctr values *)
+  let key2 = [|"0";"1"|] in
+  let key4 = [|"0";"1";"2";"3"|] in
+  let ctr2 = [|"0";"1"|] in
+  let ctr4 = [|"0";"1";"2";"3"|] in
+
+  let* {word_size; digits; algo} = RngName.of_string rng_name_arg in
+  let rand ?key_arg ?ctr_arg = function
+    | Word_size.ThirtyTwo, Digits.Two, Algo.Threefry -> Threefry_2x32.(
+        let* key = of_string_array @@ Option.value key_arg ~default:key2 in
+        let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr2 in
+        let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
+        Result.ok (to_string_array arr, incr ctr |> to_string_array)
+      )
+    | Word_size.ThirtyTwo, Digits.Four, Algo.Threefry -> Threefry_4x32.(
+        let* key = of_string_array @@ Option.value key_arg ~default:key4 in
+        let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr4 in
+        let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
+        Result.ok (to_string_array arr, incr ctr |> to_string_array)
+      )
+    | Word_size.SixtyFour, Digits.Two, Algo.Threefry -> Threefry_2x64.(
+        let* key = of_string_array @@ Option.value key_arg ~default:key2 in
+        let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr2 in
+        let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
+        Result.ok (to_string_array arr, incr ctr |> to_string_array)
+      )
+    | Word_size.SixtyFour, Digits.Four, Algo.Threefry -> Threefry_4x64.(
+        let* key = of_string_array @@ Option.value key_arg ~default:key4 in
+        let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr4 in
+        let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
+        Result.ok (to_string_array arr, incr ctr |> to_string_array)
+      )
+  in
+  let rec aux :
+    ?key_arg:string array
+    -> ?ctr_arg:string array
+    -> int
+    -> string array list
+    -> (string array list, Errors.t) result
+    = fun ?key_arg ?ctr_arg i acc ->
+      if i > 0 then
+        let* arr, ctr = rand ?key_arg ?ctr_arg (word_size, digits, algo) in
+        let m = Array.length arr in
+        let ctr_arg = Option.some ctr in
+        aux ?key_arg ?ctr_arg (i-m) (arr :: acc)
+      else
+        Result.ok @@ List.rev acc
+  in
+  let* arr = aux ?key_arg ?ctr_arg n [] in
+  let arr = Array.concat arr in
+  Result.ok @@ Array.sub arr 0 n
