@@ -3,7 +3,7 @@
 #include <caml/callback.h>
 #include <caml/alloc.h>
 
-uint rng_2x32 ( ) {
+uint rng_2x32 (void) {
   static const value* closure = NULL;
   if (closure == NULL)
     closure = caml_named_value("rng_2x32");
