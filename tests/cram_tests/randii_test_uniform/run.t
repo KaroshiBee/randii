@@ -42,13 +42,13 @@ testing the uniform generation subcommand errors (2 digit)
   
   threefry_2x32
   randii: General error: Need two digit ctr/key
-  Usage: randii uniform [OPTION]… 
+  Usage: randii uniform [OPTION]…
   Try 'randii uniform --help' or 'randii --help' for more information.
   
   
   threefry_2x64
   randii: General error: Need two digit ctr/key
-  Usage: randii uniform [OPTION]… 
+  Usage: randii uniform [OPTION]…
   Try 'randii uniform --help' or 'randii --help' for more information.
   [124]
 
@@ -91,12 +91,12 @@ testing the uniform generation subcommand errors (4 digit)
   
   threefry_4x32
   randii: General error: Need four digit ctr/key
-  Usage: randii uniform [OPTION]… 
+  Usage: randii uniform [OPTION]…
   Try 'randii uniform --help' or 'randii --help' for more information.
   
   
   threefry_4x64
   randii: General error: Need four digit ctr/key
-  Usage: randii uniform [OPTION]… 
+  Usage: randii uniform [OPTION]…
   Try 'randii uniform --help' or 'randii --help' for more information.
   [124]

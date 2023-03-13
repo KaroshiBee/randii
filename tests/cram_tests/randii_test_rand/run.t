@@ -41,13 +41,13 @@ testing the rand generation subcommand errors (2 digit)
   
   threefry_2x32
   randii: General error: Need two digit ctr/key
-  Usage: randii rand [OPTION]… 
+  Usage: randii rand [OPTION]…
   Try 'randii rand --help' or 'randii --help' for more information.
   
   
   threefry_2x64
   randii: General error: Need two digit ctr/key
-  Usage: randii rand [OPTION]… 
+  Usage: randii rand [OPTION]…
   Try 'randii rand --help' or 'randii --help' for more information.
   [124]
 
@@ -88,12 +88,12 @@ testing the rand generation subcommand errors (4 digit)
   
   threefry_4x32
   randii: General error: Need four digit ctr/key
-  Usage: randii rand [OPTION]… 
+  Usage: randii rand [OPTION]…
   Try 'randii rand --help' or 'randii --help' for more information.
   
   
   threefry_4x64
   randii: General error: Need four digit ctr/key
-  Usage: randii rand [OPTION]… 
+  Usage: randii rand [OPTION]…
   Try 'randii rand --help' or 'randii --help' for more information.
   [124]
