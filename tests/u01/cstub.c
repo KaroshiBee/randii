@@ -3,13 +3,13 @@
 #include <caml/callback.h>
 #include <caml/alloc.h>
 
-uint32 rng_2x32 (void* ) {
+uint rng_2x32 (void* ) {
   static const value* closure = NULL;
   if (closure == NULL)
     closure = caml_named_value("rng_2x32");
-
-  value result = caml_callback_exn(*closure, caml_copy_string(name));
-  return (char*) result;
+  return 1;
+//  value result = caml_callback_exn(*closure, caml_copy_string(name));
+//  return (uint32) result;
 }
 
 void initialize_example (char** argv) {
