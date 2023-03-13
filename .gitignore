@@ -97,3 +97,4 @@ ENV/
 _build/
 _coverage/
 /README.html
+/tests/u01/a.out

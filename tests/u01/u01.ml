@@ -9,7 +9,7 @@
 open Randii.Rng
 let (let*) = Result.bind
 
-let rng_2x32 k1 k2 c1 c2 index =
+let rng_2x32 (k1, k2, c1, c2, index) =
   let key_arg = [|k1; k2|] in
   let ctr_arg = [|c1; c2|] in
   match index, gen ~rng_name_arg:"threefry2x32" ~key_arg ~ctr_arg 2 Rand with
