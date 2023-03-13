@@ -3,7 +3,7 @@
 #include <caml/callback.h>
 #include <caml/alloc.h>
 
-uint rng_2x32 (void* ) {
+uint rng_2x32 ( ) {
   static const value* closure = NULL;
   if (closure == NULL)
     closure = caml_named_value("rng_2x32");
@@ -12,6 +12,6 @@ uint rng_2x32 (void* ) {
 //  return (uint32) result;
 }
 
-void initialize_example (char** argv) {
+void initialize_randii (char** argv) {
   caml_startup(argv);
 }
