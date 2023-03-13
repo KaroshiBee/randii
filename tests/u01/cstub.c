@@ -2,24 +2,22 @@
 #include <caml/mlvalues.h>
 #include <caml/callback.h>
 #include <caml/alloc.h>
+#include <string.h>
+
+value make_str (const char *s) { return caml_copy_string(s); }
+value make_str_array (const char **p) { return caml_alloc_array(make_str, p); }
+
 
 unsigned int rng_2x32 (void) {
+  printf("rng 2x32\n");
   static const value* closure = NULL;
   if (closure == NULL)
     closure = caml_named_value("rng_2x32");
 
-  char* k1 = "0";
-  char* k2 = "0";
-  char* c1 = "0";
-  char* c2 = "0";
-  int index = 0;
-  value result = caml_callback_exn(*closure,
-                                   (caml_copy_string(k1),
-                                    caml_copy_string(k2),
-                                    caml_copy_string(c1),
-                                    caml_copy_string(c2),
-                                    caml_copy_int64(index))
-                                   );
+  const char* ss[] = {"11","11","11","11", NULL};
+  value keys = make_str_array(ss);
+  value index = caml_copy_int64(0);
+  value result = caml_callback2_exn(*closure, keys, index);
   return (unsigned int)result;
 }
 
