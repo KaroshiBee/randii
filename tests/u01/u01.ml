@@ -9,20 +9,23 @@
 open Randii.Rng
 let (let*) = Result.bind
 
-let rng_2x32 ss index =
-  assert(4 = Array.length ss);
-  let k1, k2, c1, c2 = ss.(0), ss.(1), ss.(2), ss.(3) in
+let rng_2x32 ss =
+  Printf.printf "rn 2x32: ocaml\n";
+  assert(5 = Array.length ss);
+  let index, k1, k2, c1, c2 = ss.(0), ss.(1), ss.(2), ss.(3), ss.(4) in
+  Printf.printf "index: '%s'\n" index;
   Printf.printf "k1: '%s'\n" k1;
   Printf.printf "k2: '%s'\n" k2;
   Printf.printf "c1: '%s'\n" c1;
   Printf.printf "c2: '%s'\n" c2;
-  Printf.printf "index: %d\n" index;
+  let index = int_of_string index in
+  Printf.printf "index as int: %d\n" index;
   let key_arg = [|k1; k2|] in
   let ctr_arg = [|c1; c2|] in
   match index, gen ~rng_name_arg:"threefry2x32" ~key_arg ~ctr_arg 2 Rand with
-  | 0, Result.Ok [|x; _|] -> Unsigned.UInt32.of_string x
-  | 1, Result.Ok [|_; y|] -> Unsigned.UInt32.of_string y
-  | _, Result.Ok _ -> raise @@ Invalid_argument "Expected 2 rngs"
+  | 0, Result.Ok [|x; _|] -> x (* Unsigned.UInt32.of_string x *)
+  | 1, Result.Ok [|_; y|] -> y (* Unsigned.UInt32.of_string y *)
+  | _, Result.Ok _ -> raise @@ Invalid_argument "Expected 2 rng draws and index=[0,1]"
   | _, Result.Error _ -> raise @@ Invalid_argument "Errored rng"
 
 let next_2x32 i1 i2 =
