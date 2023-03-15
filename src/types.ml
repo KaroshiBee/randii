@@ -77,6 +77,20 @@ module type T4 = sig
   type digits = four_digits
 end
 
+type digits = | Two | Four
+
+module type CTR = sig
+  type el
+  type t
+  val of_string_array : string array -> (t, Errors.t) Result.t
+  val to_string_array : t -> string array
+  val copy : t -> t
+  val succ : t -> t
+  val pred : t -> t
+  val digits : t -> digits
+  val data : t -> el array
+end
+
 (* NOTE also that this implementation swaps around the args key/ctr
    as compared to the original C implementation *)
 
@@ -93,16 +107,3 @@ end
 
 
 
-type digits = | Two | Four
-
-module type CTR = sig
-  type el
-  type t
-  val of_string_array : string array -> (t, Errors.t) Result.t
-  val to_string_array : t -> string array
-  val copy : t -> t
-  val succ : t -> t
-  val pred : t -> t
-  val digits : t -> digits
-  val data : t -> el array
-end
