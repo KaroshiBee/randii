@@ -37,7 +37,6 @@ unsigned long rng_2x32 (void) {
   /* } */
 
   // 2579123966
-  // return (unsigned int)Int32_val(result);
   const char* s = String_val(result);
   const unsigned long i = convert(s);
   printf("i: %lu\n", i);
