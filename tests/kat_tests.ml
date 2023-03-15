@@ -1,15 +1,11 @@
 (* KAT == Known Answer Tests
  * data is taken from Random123 test/ dir *)
+open Randii.Threefry
+module R2x32 = Make_threefry2xW_TEST(UInt32_2_T)
+module R2x64 = Make_threefry2xW_TEST(UInt64_2_T)
 
-module U2x32 = Randii.Threefry.UInt32_2_T
-module U2x64 = Randii.Threefry.UInt64_2_T
-module R2x32 = Randii.Threefry.Make_threefry2xW_TEST(U2x32)
-module R2x64 = Randii.Threefry.Make_threefry2xW_TEST(U2x64)
-
-module U4x32 = Randii.Threefry.UInt32_4_T
-module U4x64 = Randii.Threefry.UInt64_4_T
-module R4x32 = Randii.Threefry.Make_threefry4xW_TEST(U4x32)
-module R4x64 = Randii.Threefry.Make_threefry4xW_TEST(U4x64)
+module R4x32 = Make_threefry4xW_TEST(UInt32_4_T)
+module R4x64 = Make_threefry4xW_TEST(UInt64_4_T)
 
 module I32 = Unsigned.UInt32
 module I64 = Unsigned.UInt64
