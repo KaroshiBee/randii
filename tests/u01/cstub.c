@@ -15,45 +15,69 @@ value make_str_array (const char **p) {
 
 unsigned long convert(const char *st) {
   for (const char* x = st ; *x ; x++) {
-    printf("%c, ", *x);
+    // printf("%c, ", *x);
     if (!isdigit(*x))
       return 0L;
   }
-  printf("\n");
+  // printf("\n");
   return (strtoul(st, NULL, 10));
 }
 
-static int ix = 0;
-static char* keys[] = {"0","0", NULL};
-static char* ctrs[] = {"0","0", NULL};
+void pp(const char *st) {
+  // printf("pp: ");
+  for (const char* x = st ; *x ; x++) {
+    // printf("%c, ", *x);
+  }
+  // printf("\n");
+}
 
 unsigned long rng_2x32 (void) {
-  printf("rng 2x32: start\n");
-  static const value* o_closure = NULL;
-  if (o_closure == NULL)
-    o_closure = caml_named_value("randii_rng_2x32");
-  if (o_closure == NULL) {
-    printf("rng 2x32: cannot get ocaml closure\n");
+  // printf("rng 2x32: start\n");
+
+  // globals - closures in OCaml
+  static const value* o_rng = NULL;
+  if (o_rng == NULL) {
+    // printf("rng 2x32: getting 'rng' closure\n");
+    o_rng = caml_named_value("randii_rng_2x32");
+  }
+  if (o_rng == NULL) {
+    // printf("rng 2x32: cannot get ocaml 'rng' closure\n");
     return 0L;
   }
 
-  value o_keys = make_str_array((const char**)keys);
-  value o_ctrs = make_str_array((const char**)ctrs);
-  value o_ix = Val_int(ix);
-
-  value o_result = caml_callback3(*o_closure, o_keys, o_ctrs, o_ix);
-  /* if (Is_exception_result(result)) { */
-  /*   printf("Got exception\n"); */
-  /*   return 0; */
-  /* } */
-
-  // 2579123966
-  const char* s = String_val(o_result);
-  const unsigned long i = convert(s);
-  printf("i, index: %lu, %d\n", i, ix);
-  if (1 == ix) {
-    printf("incr ctr\n");
+  static const value* o_next = NULL;
+  if (o_next == NULL) {
+    // printf("rng 2x32: getting 'next' closure\n");
+    o_next = caml_named_value("randii_next_2x32");
   }
+  if (o_next == NULL) {
+    // printf("rng 2x32: cannot get ocaml 'next' closure\n");
+    return 0L;
+  }
+
+  // globals - data
+  static int ix = 0;
+  static const char* keys[] = {"0","0", NULL};
+  static const char* ctrs[] = {"0","0", NULL};
+
+  // calcs
+  pp(ctrs[0]);
+  pp(ctrs[1]);
+  value o_keys = make_str_array(keys);
+  value o_ctrs = make_str_array(ctrs);
+  value o_ix = Val_int(ix);
+  value o_result = caml_callback3(*o_rng, o_keys, o_ctrs, o_ix);
+  // NOTE first one should be 1797259609
+  const unsigned long i = convert(String_val(o_result));
+  // printf("i, index: %lu, %d\n", i, ix);
+
+  if (1 == ix) {
+    // printf("incr ctr\n");
+    o_ctrs = caml_callback(*o_next, o_ctrs);
+    ctrs[0] = String_val(Field(o_ctrs, 0));
+    ctrs[1] = String_val(Field(o_ctrs, 1));
+  }
+  // printf("switch index\n");
   ix++;
   ix = ix % 2;
   return i;

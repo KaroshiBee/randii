@@ -15,5 +15,13 @@ int main(int argc, char** argv) {
   i = rng_2x32();
   printf("%lu\n", i);
   printf("\n");
+
+  i = rng_2x32();
+  printf("%lu\n", i);
+  printf("\n");
+
+  i = rng_2x32();
+  printf("%lu\n", i);
+  printf("\n");
   return 0;
 }
