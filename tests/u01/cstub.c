@@ -5,8 +5,13 @@
 #include <string.h>
 #include <ctype.h>
 
-value make_str (const char *s) { return caml_copy_string(s); }
-value make_str_array (const char **p) { return caml_alloc_array(make_str, p); }
+value make_str (const char *s) {
+  return caml_copy_string(s);
+}
+
+value make_str_array (const char **p) {
+  return caml_alloc_array(make_str, p);
+}
 
 unsigned long convert(const char *st) {
   for (const char* x = st ; *x ; x++) {
@@ -28,7 +33,8 @@ unsigned long rng_2x32 (void) {
     return 0L;
   }
 
-  const char* ss[] = {"1", "0","0","0","0", NULL};
+  // first one is index, next 2 are keys, final two are ctrs
+  const char* ss[] = {"1","0","0","0","0", NULL};
   value index_keys = make_str_array(ss);
   value result = caml_callback(*closure, index_keys);
   /* if (Is_exception_result(result)) { */
