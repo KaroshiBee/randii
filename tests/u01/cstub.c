@@ -33,10 +33,11 @@ unsigned long rng_2x32 (void) {
     return 0L;
   }
 
-  // first one is index, next 2 are keys, final two are ctrs
-  const char* ss[] = {"1","0","0","0","0", NULL};
-  value index_keys = make_str_array(ss);
-  value result = caml_callback(*closure, index_keys);
+  // first 2 are keys, final two are ctrs
+  const char* ss[] = {"0","0","0","0", NULL};
+  value keys = make_str_array(ss);
+  value index = Val_int(1);
+  value result = caml_callback2(*closure, keys, index);
   /* if (Is_exception_result(result)) { */
   /*   printf("Got exception\n"); */
   /*   return 0; */
