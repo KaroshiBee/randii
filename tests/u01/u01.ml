@@ -9,10 +9,12 @@
 open Randii.Rng
 let (let*) = Result.bind
 
-let rng_2x32 ss index =
+let rng_2x32 keys ctrs index =
   Printf.printf "rng 2x32: ocaml\n";
-  assert(4 = Array.length ss);
-  let k1, k2, c1, c2 = ss.(0), ss.(1), ss.(2), ss.(3) in
+  assert(2 = Array.length keys);
+  let k1, k2 = keys.(0), keys.(1) in
+  assert(2 = Array.length ctrs);
+  let c1, c2 = ctrs.(0), ctrs.(1) in
   Printf.printf "k1: '%s'\n" k1;
   Printf.printf "k2: '%s'\n" k2;
   Printf.printf "c1: '%s'\n" c1;
