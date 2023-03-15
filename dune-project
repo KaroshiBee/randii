@@ -24,5 +24,6 @@
   (alcotest :with-test)
   (zarith (and :with-test (>= 1.12)))
   (bisect_ppx (and :with-test (>= 2.6.0)))
+  (testu01 :with-test)
   )
-  )
+)
