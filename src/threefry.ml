@@ -69,85 +69,7 @@
  * */
  *  *)
 
-module Consts = struct
-  type 'a t = {
-    (* rotation amounts *)
-    i_0: 'a;
-    i_1: 'a;
-    i_2: 'a;
-    i_3: 'a;
-    i_4: 'a;
-    i_5: 'a;
-    i_6: 'a;
-    i_7: 'a;
-  }
-
-  let make f i_0 i_1 i_2 i_3 i_4 i_5 i_6 i_7 = {
-    i_0=f i_0;
-    i_1=f i_1;
-    i_2=f i_2;
-    i_3=f i_3;
-    i_4=f i_4;
-    i_5=f i_5;
-    i_6=f i_6;
-    i_7=f i_7;
-  }
-
-  let zeros f = {
-    i_0=f 0;
-    i_1=f 0;
-    i_2=f 0;
-    i_3=f 0;
-    i_4=f 0;
-    i_5=f 0;
-    i_6=f 0;
-    i_7=f 0;
-  }
-
-end
-
-type two_digits
-type four_digits
-
-
-(* factor out dependence on UInt32 / UInt64 *)
-module type T = sig
-  type digits
-  type t (* UInt32 or UInt64 *)
-  val of_int : int -> t
-  val to_int : t -> int
-  val of_string : string -> t
-  val to_string : t -> string
-  val equal : t -> t -> bool
-  val succ : t -> t
-  val pred : t -> t
-  val zero : t
-  val one : t
-  val max_int : t
-  val add : t -> t -> t
-  val sub : t -> t -> t
-  val rem : t -> t -> t
-  val logxor : t -> t -> t
-
-  val default_rounds : int
-  val skein_ks_parity : t
-  val rotations_0 : t Consts.t
-  val rotations_1 : t Consts.t
-
-  val rotL : t -> t -> t
-
-end
-
-module type T2 = sig
-  include T
-  type digits = two_digits
-end
-
-module type T4 = sig
-  include T
-  type digits = four_digits
-end
-
+open Types
 
 module UInt32_2_T = struct
   include Unsigned.UInt32
@@ -279,26 +201,9 @@ module UInt64_4_T = struct
 
 end
 
-(* NOTE also that this implementation swaps around the args key/ctr
-   as compared to the original C implementation *)
+module Make_threefry2xW_TEST (T:T2) : RAND_TEST_T with type t = T.t array = struct
 
-module type RAND_T = sig
-  type ctr_t
-  type key_t
-  val rand : key_t -> ctr_t -> ctr_t
-end
-
-(* expose rand_R for testing purposes *)
-module type RAND_TEST_T = sig
-  include RAND_T
-  val rand_R : int -> key_t -> ctr_t -> ctr_t
-end
-
-module Make_threefry2xW_TEST (T:T2) : (RAND_TEST_T with type ctr_t := T.t array and type key_t := T.t array) = struct
-
-  type t = T.t
-  type ctr_t = t array
-  type key_t = t array
+  type t = T.t array
 
   let _aux1 lbound nrounds x0 x1 i =
     (* if(Nrounds>0){  X0 += X1; X1 = RotL_##W(X1,R_##W##x2_0_0); X1 ^= X0; }  *)
@@ -321,7 +226,7 @@ module Make_threefry2xW_TEST (T:T2) : (RAND_TEST_T with type ctr_t := T.t array 
       )
     else ()
 
-  let rand_R nrounds (key:key_t) (ctr:ctr_t) =
+  let rand_R ~rounds:nrounds ~key ~ctr =
     let open T in
     let max_rounds = 32 in
     let _ = if nrounds > max_rounds then
@@ -388,16 +293,14 @@ module Make_threefry2xW_TEST (T:T2) : (RAND_TEST_T with type ctr_t := T.t array 
 
     [|!x0; !x1|]
 
-  let rand (key:key_t) (ctr:ctr_t) =
-    rand_R T.default_rounds key ctr
+  let rand ~key ~ctr =
+    rand_R ~rounds:T.default_rounds ~key ~ctr
 
 end
 
-module Make_threefry4xW_TEST (T:T4) : (RAND_TEST_T with type ctr_t := T.t array and type key_t := T.t array) = struct
+module Make_threefry4xW_TEST (T:T4) : RAND_TEST_T with type t = T.t array = struct
 
-  type t = T.t
-  type ctr_t = t array
-  type key_t = t array
+  type t = T.t array
 
   let _aux1 lbound nrounds x0 x1 x2 x3 i_0 i_1 =
     (* if(Nrounds>0){                                                      \
@@ -433,7 +336,7 @@ module Make_threefry4xW_TEST (T:T4) : (RAND_TEST_T with type ctr_t := T.t array 
       )
     else ()
 
-  let rand_R nrounds (key:key_t) (ctr:ctr_t) =
+  let rand_R ~rounds:nrounds ~key ~ctr =
     let open T in
     let max_rounds = 72 in
     let _ = if nrounds > max_rounds then
@@ -569,17 +472,17 @@ module Make_threefry4xW_TEST (T:T4) : (RAND_TEST_T with type ctr_t := T.t array 
     [|!x0; !x1; !x2; !x3|]
 
 
-  let rand (key:key_t) (ctr:ctr_t) =
-    rand_R T.default_rounds key ctr
+  let rand ~key ~ctr =
+    rand_R ~rounds:T.default_rounds ~key ~ctr
 
 end
 
 
-module Make_threefry2xW (T:T2) : (RAND_T with type ctr_t := T.t array and type key_t := T.t array) = struct
+module Make_threefry2xW (T:T2) : RAND_T with type t = T.t array = struct
   include Make_threefry2xW_TEST(T)
 end
 
-module Make_threefry4xW (T:T4) : (RAND_T with type ctr_t := T.t array and type key_t := T.t array) = struct
+module Make_threefry4xW (T:T4) : RAND_T with type t = T.t array = struct
   include Make_threefry4xW_TEST(T)
 end
 

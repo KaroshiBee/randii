@@ -13,11 +13,12 @@
  * } while (x >= RAND_MAX - (RAND_MAX % n))
  *
  * x %= n; *)
+open Types
 
 module Maker_
-    (U:Threefry.T)
-    (Ctr:Ctr.CTR with type el := U.t)
-    (Rng:Threefry.RAND_T with type ctr_t := U.t array and type key_t := U.t array)
+    (U:T)
+    (Ctr:CTR with type el := U.t)
+    (Rng:RAND_T with type t = U.t array)
 = struct
 
   let limit n = U.(sub max_int (rem max_int n))
@@ -38,7 +39,7 @@ module Maker_
   let rand2 ~key ~ctr =
     match (Ctr.digits ctr, Ctr.digits key) with
     | (Two, Two) ->
-      Rng.rand (Ctr.data key) (Ctr.data ctr)
+      Rng.rand ~key:(Ctr.data key) ~ctr:(Ctr.data ctr)
       |> Array.map U.to_string
       |> Ctr.of_string_array
     | _ -> Result.error @@ `Error "Need two digit ctr/key"
@@ -48,14 +49,14 @@ module Maker_
     if U.equal U.zero upper then Result.error @@ `Error "zero upper" else
       match (Ctr.digits ctr, Ctr.digits key) with
       | (Two, Two) ->
-        Rng.rand (Ctr.data key) (Ctr.data ctr)
+        Rng.rand ~key:(Ctr.data key) ~ctr:(Ctr.data ctr)
         |> unbiased upper
       | _ -> Result.error @@ `Error "Need two digit ctr/key"
 
   let rand4 ~key ~ctr =
     match (Ctr.digits ctr, Ctr.digits key) with
     | (Four, Four) ->
-      Rng.rand (Ctr.data key) (Ctr.data ctr)
+      Rng.rand ~key:(Ctr.data key) ~ctr:(Ctr.data ctr)
       |> Array.map U.to_string
       |> Ctr.of_string_array
     | _ -> Result.error @@ `Error "Need four digit ctr/key"
@@ -65,7 +66,7 @@ module Maker_
     if U.equal U.zero upper then Result.error @@ `Error "zero upper" else
       match (Ctr.digits ctr, Ctr.digits key) with
       | (Four, Four) ->
-        Rng.rand (Ctr.data key) (Ctr.data ctr)
+        Rng.rand ~key:(Ctr.data key) ~ctr:(Ctr.data ctr)
         |> unbiased upper
       | _ -> Result.error @@ `Error "Need four digit ctr/key"
 
@@ -82,7 +83,7 @@ module type DISCRETE = sig
   val of_string_array : string array -> (t, Errors.t) Result.t
 end
 
-module Make_discrete2xW (U:Threefry.T2) : DISCRETE = struct
+module Make_discrete2xW (U:T2) : DISCRETE = struct
 
   module Ctr = Ctr.Make_ctr(U)
   module Rng = Threefry.Make_threefry2xW(U)
@@ -99,7 +100,7 @@ module Make_discrete2xW (U:Threefry.T2) : DISCRETE = struct
   let of_string_array = Ctr.of_string_array
 end
 
-module Make_discrete4xW (U:Threefry.T4) : DISCRETE = struct
+module Make_discrete4xW (U:T4) : DISCRETE = struct
 
   module Ctr = Ctr.Make_ctr(U)
   module Rng = Threefry.Make_threefry4xW(U)

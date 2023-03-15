@@ -15,25 +15,25 @@ let test_failure_2x32 () =
   let z = I32.zero in
   let zs = [|z;z|] in
   Alcotest.(check_raises "nrounds too big" (Failure "number rounds must be <= 32")
-              (fun () -> let _ = R2x32_T.rand_R 100 zs zs in ()))
+              (fun () -> let _ = R2x32_T.rand_R ~rounds:100 ~key:zs ~ctr:zs in ()))
 
 let test_failure_4x32 () =
   let z = I32.zero in
   let zs = [|z;z;z;z|] in
   Alcotest.(check_raises "nrounds too big" (Failure "number rounds must be <= 72")
-              (fun () -> let _ = R4x32_T.rand_R 100 zs zs in ()))
+              (fun () -> let _ = R4x32_T.rand_R ~rounds:100 ~key:zs ~ctr:zs in ()))
 
 let test_failure_2x64 () =
   let z = I64.zero in
   let zs = [|z;z|] in
   Alcotest.(check_raises "nrounds too big" (Failure "number rounds must be <= 32")
-              (fun () -> let _ = R2x64_T.rand_R 100 zs zs in ()))
+              (fun () -> let _ = R2x64_T.rand_R ~rounds:100 ~key:zs ~ctr:zs in ()))
 
 let test_failure_4x64 () =
   let z = I64.zero in
   let zs = [|z;z;z;z|] in
   Alcotest.(check_raises "nrounds too big" (Failure "number rounds must be <= 72")
-              (fun () -> let _ = R4x64_T.rand_R 100 zs zs in ()))
+              (fun () -> let _ = R4x64_T.rand_R ~rounds:100 ~key:zs ~ctr:zs in ()))
 
 let test_threefry2x32 () =
   let expected = [|"0x6b200159"; "0x99ba4efe"|]
@@ -43,7 +43,7 @@ let test_threefry2x32 () =
   let actual =
     let z = I32.zero in
     let zs = [|z;z|] in
-    R2x32.rand zs zs |> Array.map I32.to_string in
+    R2x32.rand ~key:zs ~ctr:zs |> Array.map I32.to_string in
   Alcotest.(check (array string))
     "Threefry2x32 with zeros input"
     expected actual
@@ -56,7 +56,7 @@ let test_threefry2x64 () =
   let actual =
     let z = I64.zero in
     let zs = [|z;z|] in
-    R2x64.rand zs zs |> Array.map I64.to_string in
+    R2x64.rand ~key:zs ~ctr:zs |> Array.map I64.to_string in
   Alcotest.(check (array string))
     "Threefry2x64 with zeros input"
     expected actual
@@ -69,7 +69,7 @@ let test_threefry4x32 () =
   let actual =
     let z = I32.zero in
     let zs = [|z;z;z;z|] in
-    R4x32.rand zs zs |> Array.map I32.to_string in
+    R4x32.rand ~key:zs ~ctr:zs |> Array.map I32.to_string in
   Alcotest.(check (array string))
     "Threefry4x32 with zeros input"
     expected actual
@@ -82,7 +82,7 @@ let test_threefry4x64 () =
   let actual =
     let z = I64.zero in
     let zs = [|z;z;z;z|] in
-    R4x64.rand zs zs |> Array.map I64.to_string in
+    R4x64.rand ~key:zs ~ctr:zs |> Array.map I64.to_string in
   Alcotest.(check (array string))
     "Threefry4x64 with zeros input"
     expected actual

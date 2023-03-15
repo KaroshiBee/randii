@@ -1,4 +1,4 @@
-module Ctr_test (I:Randii.Threefry.T) = struct
+module Ctr_test (I:Randii.Types.T) = struct
 
   module C = Randii.Ctr.Make_ctr(I)
 

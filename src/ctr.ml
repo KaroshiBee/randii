@@ -1,18 +1,6 @@
-type digits = | Two | Four
+open Types
 
-module type CTR = sig
-  type el
-  type t
-  val of_string_array : string array -> (t, Errors.t) Result.t
-  val to_string_array : t -> string array
-  val copy : t -> t
-  val succ : t -> t
-  val pred : t -> t
-  val digits : t -> digits
-  val data : t -> el array
-end
-
-module Make_ctr (U:Threefry.T) : (CTR with type el := U.t) = struct
+module Make_ctr (U:T) : (CTR with type el := U.t) = struct
   type el = U.t
   type t = {
     data: el array;

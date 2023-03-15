@@ -79,13 +79,13 @@ let read_kat_data ln =
 let test_kat_data i rng_data () =
   let RngData.{name; nrounds; ctr; key; expected} = rng_data in
   let actual = match (name.digits, name.word_size) with
-    | (Two,  ThirtyTwo) -> R2x32.rand_R nrounds (key |> Array.map I32.of_string) (ctr |> Array.map I32.of_string)
+    | (Two,  ThirtyTwo) -> R2x32.rand_R ~rounds:nrounds ~key:(key |> Array.map I32.of_string) ~ctr:(ctr |> Array.map I32.of_string)
                            |> Array.map I32.to_string
-    | (Two,  SixtyFour) -> R2x64.rand_R nrounds (key |> Array.map I64.of_string) (ctr |> Array.map I64.of_string)
+    | (Two,  SixtyFour) -> R2x64.rand_R ~rounds:nrounds ~key:(key |> Array.map I64.of_string) ~ctr:(ctr |> Array.map I64.of_string)
                            |> Array.map I64.to_string
-    | (Four, ThirtyTwo) -> R4x32.rand_R nrounds (key |> Array.map I32.of_string) (ctr |> Array.map I32.of_string)
+    | (Four, ThirtyTwo) -> R4x32.rand_R ~rounds:nrounds ~key:(key |> Array.map I32.of_string) ~ctr:(ctr |> Array.map I32.of_string)
                            |> Array.map I32.to_string
-    | (Four, SixtyFour) -> R4x64.rand_R nrounds (key |> Array.map I64.of_string) (ctr |> Array.map I64.of_string)
+    | (Four, SixtyFour) -> R4x64.rand_R ~rounds:nrounds ~key:(key |> Array.map I64.of_string) ~ctr:(ctr |> Array.map I64.of_string)
                            |> Array.map I64.to_string
   in
   Alcotest.(check (array string))
