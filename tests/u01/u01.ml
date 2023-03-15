@@ -28,12 +28,13 @@ let rng_2x32 keys ctrs index =
   | _, Result.Ok _ -> raise @@ Invalid_argument "Expected 2 rng draws and index=[0,1]"
   | _, Result.Error _ -> raise @@ Invalid_argument "Errored rng"
 
-let next_2x32 i1 i2 =
+let next_2x32 arr_in =
+  assert(2 == Array.length arr_in);
   let module T = Threefry_2x32 in
-  match T.of_string_array [|i1;i2|] with
+  match T.of_string_array arr_in with
   | Result.Ok arr -> (
       match arr |> T.incr |> T.to_string_array with
-      | [|x; y|] -> (x, y)
+      | [|_x; _y|] as arr -> arr
       | _ -> raise @@ Invalid_argument "Errored next"
     )
   | Result.Error _ -> raise @@ Invalid_argument "Errored next"
