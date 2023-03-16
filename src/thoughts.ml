@@ -498,31 +498,26 @@ end
 let default_rounds = 20
 
 module type CTR = sig
-  module N : NUM
   type t
-  val of_array : (N.digits, N.word) N.t array -> t
-  val to_array : t -> (N.digits, N.word) N.t array
   val of_int_array : int array ->  t
   val to_int_array :  t -> int array
   val of_string_array : string array ->  t
   val to_string_array :  t -> string array
   val succ :  t ->  t
+  val rand : ?rounds:int -> key:t -> ctr:t -> unit -> t
 end
 
+module Make_threefry (Num:NUM) (Rng:RNG with type digits = Num.digits) : CTR = struct
 
-module Make_ctr (Num:NUM) : CTR = struct
+  module T = Rng.Make(Num)
 
-  module N = Num
-  type t = (N.digits, N.word) N.t array
+  type t = (Num.digits, Num.word) Num.t array
 
-  let of_array arr = assert (N.digits == Array.length arr); arr
-  let to_array t = t
+  let of_int_array arr = assert (Num.digits == Array.length arr); Array.map Num.of_int arr
+  let to_int_array = Array.map Num.to_int
 
-  let of_int_array arr = assert (N.digits == Array.length arr); Array.map N.of_int arr
-  let to_int_array = Array.map N.to_int
-
-  let of_string_array arr = assert (N.digits == Array.length arr); Array.map N.of_string arr
-  let to_string_array = Array.map N.to_string
+  let of_string_array arr = assert (Num.digits == Array.length arr); Array.map Num.of_string arr
+  let to_string_array = Array.map Num.to_string
 
   let rec ctr ~equal digit op sentinal t =
     let n = Array.length t in
@@ -533,13 +528,8 @@ module Make_ctr (Num:NUM) : CTR = struct
       | true -> t.(digit) <- d; ctr ~equal (digit+1) op sentinal t
     )
 
-  let succ t = ctr ~equal:N.equal 0 N.succ N.zero t; t
+  let succ t = ctr ~equal:Num.equal 0 Num.succ Num.zero t; t
 
-end
-
-
-module Make_threefry (Num:NUM) (Rng:RNG with type digits = Num.digits) = struct
-  module T = Rng.Make(Num)
   let rand ?(rounds=default_rounds) ~key ~ctr () =
     T.rand_R ~of_int:Num.of_int ~rounds ~key ~ctr
 end
