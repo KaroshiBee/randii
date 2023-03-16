@@ -15,7 +15,11 @@ let rec ctr ~equal digit op sentinal t =
 
 (* factor out dependence on UInt32 / UInt64 and word size (32/64 bit) *)
 module type NUM = sig
+  (* type digits *)
+  (* type word *)
+
   type ('digits, 'word) t (* UInt32 or UInt64 *)
+
   val of_int_2_32 : int -> (digits_two, word_32) t
   val of_int_4_32 : int -> (digits_four, word_32) t
   val of_int_2_64 : int -> (digits_two, word_64) t
@@ -44,6 +48,191 @@ module type NUM = sig
   val rotations_0 : ('digits, 'word) t Types.Consts.t
   val rotations_1 : ('digits, 'word) t Types.Consts.t
   val rotL : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t
+end
+
+module Num_uint32_2 = struct
+  type (_,_) t = Unsigned.UInt32.t
+  open Unsigned.UInt32
+
+  let of_int = of_int
+  let of_int_2_32 = of_int
+  let of_int_4_32 _ = raise @@ Failure "expected 2 digits"
+  let of_int_2_64 _ = raise @@ Failure "expected 32 bit"
+  let of_int_4_64 _ = raise @@ Failure "expected 32 bit"
+  let to_int = to_int
+
+  let of_string_2_32 = of_string
+  let of_string_4_32 _ = raise @@ Failure "expected 2 digits"
+  let of_string_2_64 _ = raise @@ Failure "expected 32 bit"
+  let of_string_4_64 _ = raise @@ Failure "expected 32 bit"
+  let to_string = to_string
+
+  let zero = of_int 0
+  (* let one : ('digits, 'word) t *)
+  (* let max_int : ('digits, 'word) t *)
+
+  let equal = equal
+  let succ = succ
+  (* let pred : ('digits, 'word) t -> ('digits, 'word) t *)
+  let add = add
+  (* let sub : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t *)
+  (* let rem : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t *)
+  let logxor = logxor
+
+  (* #define SKEIN_KS_PARITY32         0x1BD11BDA *)
+  let skein_ks_parity = "0x1BD11BDA" |> of_string
+
+  let rotations_0 = Types.Consts.make
+      of_int
+      13
+      15
+      26
+      6
+      17
+      29
+      16
+      24
+
+  let rotations_1 = Types.Consts.zeros of_int
+
+  let _31 = 31 |> of_int
+  let _32 = 32 |> of_int
+
+  let rotL x n =
+    let l = logand n _31 |> to_int in
+    let left = shift_left x l in
+    let r = (logand (sub _32 n) _31) |> to_int in
+    let right = shift_right x r in
+    logor left right
+
+end
+
+module Num_uint32_4 = struct
+  include Num_uint32_2
+  open Unsigned.UInt32
+
+  let of_int_2_32 _ = raise @@ Failure "expected 4 digits"
+  let of_int_4_32 = of_int
+
+  let of_string_2_32 _ = raise @@ Failure "expected 4 digits"
+  let of_string_4_32 = of_string
+
+  let rotations_0 = Types.Consts.make
+      of_int
+      10
+      11
+      13
+      23
+      6
+      17
+      25
+      18
+
+  let rotations_1 = Types.Consts.make
+      of_int
+      26
+      21
+      27
+      5
+      20
+      11
+      10
+      20
+end
+
+
+module Num_uint64_2 = struct
+  type (_,_) t = Unsigned.UInt64.t
+  open Unsigned.UInt64
+
+  let of_int = of_int
+  let of_int_2_32 _ = raise @@ Failure "expected 64 bit"
+  let of_int_4_32 _ = raise @@ Failure "expected 64 bit"
+  let of_int_2_64 = of_int
+  let of_int_4_64 _ = raise @@ Failure "expected 2 digits"
+  let to_int = to_int
+
+  let of_string_2_32 _ = raise @@ Failure "expected 64 bit"
+  let of_string_4_32 _ = raise @@ Failure "expected 64 bit"
+  let of_string_2_64 = of_string
+  let of_string_4_64 _ = raise @@ Failure "expected 2 digits"
+  let to_string = to_string
+
+  let zero = of_int 0
+  (* let one : ('digits, 'word) t *)
+  (* let max_int : ('digits, 'word) t *)
+
+  let equal = equal
+  let succ = succ
+  (* let pred : ('digits, 'word) t -> ('digits, 'word) t *)
+  let add = add
+  (* let sub : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t *)
+  (* let rem : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t *)
+  let logxor = logxor
+
+  (* #define SKEIN_MK_64(hi32,lo32)  ((lo32) + (((uint64_t) (hi32)) << 32))
+   * #define SKEIN_KS_PARITY64         SKEIN_MK_64(0x1BD11BDA,0xA9FC1A22) *)
+  let skein_ks_parity =
+    let hi = "0x1BD11BDA" |> of_string in
+    let lo = "0xA9FC1A22" |> of_string in
+    add lo (shift_left hi 32)
+
+  let rotations_0 = Types.Consts.make
+      of_int
+      16
+      42
+      12
+      31
+      16
+      32
+      24
+      21
+
+  let rotations_1 = Types.Consts.zeros of_int
+
+  let _63 = 63 |> of_int
+  let _64 = 64 |> of_int
+
+  let rotL x n =
+    let l = logand n _63 |> to_int in
+    let left = shift_left x l in
+    let r = (logand (sub _64 n) _63) |> to_int in
+    let right = shift_right x r in
+    logor left right
+
+end
+
+module Num_uint64_4 = struct
+  include Num_uint64_2
+  open Unsigned.UInt64
+
+  let of_int_2_64 _ = raise @@ Failure "expected 4 digits"
+  let of_int_4_64 = of_int
+
+  let of_string_2_64 _ = raise @@ Failure "expected 4 digits"
+  let of_string_4_64 = of_string
+
+  let rotations_0 = Types.Consts.make
+      of_int
+      14
+      52
+      23
+      5
+      25
+      46
+      58
+      32
+
+  let rotations_1 = Types.Consts.make
+      of_int
+      16
+      57
+      40
+      37
+      33
+      12
+      22
+      32
 
 end
 
@@ -86,6 +275,7 @@ module Threefry_2_XX (Num:NUM) = struct
     let ks1 = key.(1) in
     let x1 = ref (add ctr.(1) ks1) in
     let ks2 = logxor ks2 ks1 in
+
     let _aux1 = aux1 in
     let _aux3 = aux3 ~of_int in
 
@@ -329,7 +519,8 @@ module type RNG = sig
   val succ : t -> t
 end
 
-module Threefry_2_32 (Num:NUM) : RNG = struct
+module Make_threefry_2_32 () : RNG = struct
+  module Num = Num_uint32_2
   module T = Threefry_2_XX(Num)
 
   type t = (digits_two, word_32) Num.t array
@@ -340,12 +531,13 @@ module Threefry_2_32 (Num:NUM) : RNG = struct
   let to_string_array = Array.map Num.to_string
 
   let rand ?(rounds=default_rounds) ~key ~ctr () =
-    T.rand_R ~of_int:Num.of_int_2_32 ~rounds ~key ~ctr
+    T.rand_R ~of_int:Num.of_int ~rounds ~key ~ctr
 
   let succ t = ctr ~equal:Num.equal 0 Num.succ Num.zero t; t
 end
 
-module Threefry_4_32 (Num:NUM) : RNG = struct
+module Make_threefry_4_32 () : RNG = struct
+  module Num = Num_uint32_4
   module T = Threefry_4_XX(Num)
 
   type t = (digits_four, word_32) Num.t array
@@ -356,12 +548,13 @@ module Threefry_4_32 (Num:NUM) : RNG = struct
   let to_string_array = Array.map Num.to_string
 
   let rand ?(rounds=default_rounds) ~key ~ctr () =
-    T.rand_R ~of_int:Num.of_int_4_32 ~rounds ~key ~ctr
+    T.rand_R ~of_int:Num.of_int ~rounds ~key ~ctr
 
   let succ t = ctr ~equal:Num.equal 0 Num.succ Num.zero t; t
 end
 
-module Threefry_2_64 (Num:NUM) : RNG = struct
+module Make_threefry_2_64 () : RNG = struct
+  module Num = Num_uint64_2
   module T = Threefry_2_XX(Num)
 
   type t = (digits_two, word_64) Num.t array
@@ -372,12 +565,13 @@ module Threefry_2_64 (Num:NUM) : RNG = struct
   let to_string_array = Array.map Num.to_string
 
   let rand ?(rounds=default_rounds) ~key ~ctr () =
-    T.rand_R ~of_int:Num.of_int_2_64 ~rounds ~key ~ctr
+    T.rand_R ~of_int:Num.of_int ~rounds ~key ~ctr
 
   let succ t = ctr ~equal:Num.equal 0 Num.succ Num.zero t; t
 end
 
-module Threefry_4_64 (Num:NUM) : RNG = struct
+module Make_threefry_4_64 () : RNG = struct
+  module Num = Num_uint64_4
   module T = Threefry_4_XX(Num)
 
   type t = (digits_four, word_64) Num.t array
@@ -392,3 +586,8 @@ module Threefry_4_64 (Num:NUM) : RNG = struct
 
   let succ t = ctr ~equal:Num.equal 0 Num.succ Num.zero t; t
 end
+
+module Threefry_2_32 = Make_threefry_2_32()
+module Threefry_4_32 = Make_threefry_4_32()
+module Threefry_2_64 = Make_threefry_2_64()
+module Threefry_4_64 = Make_threefry_4_64()
