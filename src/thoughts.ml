@@ -15,6 +15,9 @@ module type NUM = sig
   val of_int : int -> (digits, word) t
   val of_string : string -> (digits, word) t
   val zero : (digits, word) t
+  val one : (digits, word) t
+  val max_int : (digits, word) t
+
   val skein_ks_parity : (digits, word) t
   val rotations_0 : (digits, word) t Types.Consts.t
   val rotations_1 : (digits, word) t Types.Consts.t
@@ -23,18 +26,14 @@ module type NUM = sig
   val to_int : ('digits, 'word) t -> int
   val to_string : ('digits, 'word) t -> string
 
-  (* val one : ('digits, 'word) t *)
-  (* val max_int : ('digits, 'word) t *)
-
   val digits : int
   val equal : ('digits, 'word) t -> ('digits, 'word) t -> bool
   val succ : ('digits, 'word) t -> ('digits, 'word) t
-  (* val pred : ('digits, 'word) t -> ('digits, 'word) t *)
+  val pred : ('digits, 'word) t -> ('digits, 'word) t
   val add : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t
-  (* val sub : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t *)
-  (* val rem : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t *)
+  val sub : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t
+  val rem : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t
   val logxor : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t
-
   val rotL : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t
 end
 
@@ -47,19 +46,19 @@ module Num_uint32_2 = struct
   let of_int = U.of_int
   let of_string = U.of_string
   let zero = of_int 0
+  let one = of_int 1
+  let max_int = U.max_int
 
   let to_int = U.to_int
   let to_string = U.to_string
 
-  (* let one : ('digits, 'word) t *)
-  (* let max_int : ('digits, 'word) t *)
   let digits = 2
   let equal = U.equal
   let succ = U.succ
-  (* let pred : ('digits, 'word) t -> ('digits, 'word) t *)
+  let pred = U.pred
   let add = U.add
-  (* let sub : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t *)
-  (* let rem : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t *)
+  let sub = U.sub
+  let rem = U.rem
   let logxor = U.logxor
 
   (* #define SKEIN_KS_PARITY32         0x1BD11BDA *)
@@ -132,17 +131,22 @@ module Num_uint64_2 = struct
   let of_string = U.of_string
   let to_string = U.to_string
 
+  let of_int = U.of_int
+  let of_string = U.of_string
   let zero = of_int 0
-  (* let one : ('digits, 'word) t *)
-  (* let max_int : ('digits, 'word) t *)
+  let one = of_int 1
+  let max_int = U.max_int
+
+  let to_int = U.to_int
+  let to_string = U.to_string
 
   let digits = 2
   let equal = U.equal
   let succ = U.succ
-  (* let pred : ('digits, 'word) t -> ('digits, 'word) t *)
+  let pred = U.pred
   let add = U.add
-  (* let sub : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t *)
-  (* let rem : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t *)
+  let sub = U.sub
+  let rem = U.rem
   let logxor = U.logxor
 
   (* #define SKEIN_MK_64(hi32,lo32)  ((lo32) + (((uint64_t) (hi32)) << 32))
@@ -219,7 +223,7 @@ module type RNG = sig
   end
 end
 
-module Threefry_2_XX = struct
+module Make_threefry_2_XX = struct
   type digits = digits_two
   module Make (Num:NUM) = struct
 
@@ -315,7 +319,7 @@ module Threefry_2_XX = struct
   end
 end
 
-module Threefry_4_XX = struct
+module Make_threefry_4_XX = struct
   type digits = digits_four
   module Make (Num:NUM) = struct
 
@@ -534,7 +538,7 @@ module Make_threefry (Num:NUM) (Rng:RNG with type digits = Num.digits) : CTR = s
     T.rand_R ~of_int:Num.of_int ~rounds ~key ~ctr
 end
 
-module Threefry_2_32 = Make_threefry (Num_uint32_2) (Threefry_2_XX)
-module Threefry_4_32 = Make_threefry (Num_uint32_4) (Threefry_4_XX)
-module Threefry_2_64 = Make_threefry (Num_uint64_2) (Threefry_2_XX)
-module Threefry_4_64 = Make_threefry (Num_uint64_4) (Threefry_4_XX)
+module Threefry_2_32 = Make_threefry (Num_uint32_2) (Make_threefry_2_XX)
+module Threefry_4_32 = Make_threefry (Num_uint32_4) (Make_threefry_4_XX)
+module Threefry_2_64 = Make_threefry (Num_uint64_2) (Make_threefry_2_XX)
+module Threefry_4_64 = Make_threefry (Num_uint64_4) (Make_threefry_4_XX)
