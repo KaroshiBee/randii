@@ -66,4 +66,5 @@ module type GEN = sig
   val rand : ?rounds:int -> key:t -> ctr:t -> unit -> t
   val uniform : ?upper:int -> ?rounds:int -> key:t -> ctr:t -> unit -> int array
   val uniform01 : ?rounds:int -> key:t -> ctr:t -> unit -> float array
+  val digits : int
 end

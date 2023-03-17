@@ -139,6 +139,8 @@ module Make
     let arr = unbiased ~key ~ctr default_upper @@ rand ~rounds ~key ~ctr () in
     Array.map (fun x -> let f = Num.to_int x |> float_of_int in f /. default_upper_float) arr
 
+  let digits = Num.digits
+
 end
 
 module Gen_2_32 = Make (Num_uint32_2) (Rng_threefry_2_digits)
