@@ -49,28 +49,23 @@ module Rng_4x32 = Make (Randii.Rng.Threefry_4x32)
 module Rng_4x64 = Make (Randii.Rng.Threefry_4x64)
 
 open TestU01
-open Probdist
 
 let () =
   let () = Rng_2x32.reset () in
   let gen = Unif01.create_extern_gen_bits "randii 2x32" Rng_2x32.bits in
-  Gofw.set_suspectp 0.01;
   Bbattery.small_crush gen
 
 let () =
   let () = Rng_2x64.reset () in
   let gen = Unif01.create_extern_gen_bits "randii 2x64" Rng_2x64.bits in
-  Gofw.set_suspectp 0.01;
   Bbattery.small_crush gen
 
 let () =
   let () = Rng_4x32.reset () in
   let gen = Unif01.create_extern_gen_bits "randii 4x32" Rng_4x32.bits in
-  Gofw.set_suspectp 0.01;
   Bbattery.small_crush gen
 
 let () =
   let () = Rng_4x64.reset () in
   let gen = Unif01.create_extern_gen_bits "randii 4x64" Rng_4x64.bits in
-  Gofw.set_suspectp 0.01;
   Bbattery.small_crush gen
