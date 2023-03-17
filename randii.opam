@@ -2,7 +2,7 @@
 opam-version: "2.0"
 version: "1.0.0"
 synopsis:
-  "A pure OCaml port of the Random123 counter based random number generator"
+  "A pure OCaml port of the Random123 counter based random number generator from DEShaw Research"
 description:
   "Currently implements the Threefry 2&4 digit 32&64 bit random number generators"
 maintainer: ["simon.parry@karoshibee.com"]
@@ -21,7 +21,7 @@ depends: [
   "alcotest" {with-test}
   "zarith" {with-test & >= "1.12"}
   "bisect_ppx" {with-test & >= "2.6.0"}
-  "testu01" {with-test}
+  "testu01" {with-test & >= "1.2.3-0.2"}
   "odoc" {with-doc}
 ]
 build: [
