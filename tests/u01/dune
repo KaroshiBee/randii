@@ -1,0 +1,9 @@
+(executable
+ (name main)
+ (public_name randii.u01_test)
+ (libraries
+   testu01
+   utils
+   randii
+   logs
+))
