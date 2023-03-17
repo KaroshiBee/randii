@@ -5,9 +5,7 @@ testing the uniform01 generation subcommand defaults
   0.372508365661
 
 testing the uniform01 generation subcommand with args (2 digit)
-  $ for name in 2x32 2x64; do echo "\n\nthreefry_$name" && randii uniform01 -k 1 -k 2 -c 10 -c 20 -n 10 -r threefry$name; done
-  
-  
+  $ for name in 2x32 2x64; do echo "threefry_$name" && randii uniform01 -k 1 -k 2 -c 10 -c 20 -n 10 -r threefry$name; done
   threefry_2x32
   
   0.0549717284739
@@ -20,8 +18,6 @@ testing the uniform01 generation subcommand with args (2 digit)
   0.791789597832
   0.332666493021
   0.192312333733
-  
-  
   threefry_2x64
   
   0.965788019821
@@ -36,15 +32,11 @@ testing the uniform01 generation subcommand with args (2 digit)
   0.697210346349
 
 testing the uniform01 generation subcommand errors (2 digit)
-  $ for name in 2x32 2x64; do echo "\n\nthreefry_$name" && randii uniform01 -k 1 -k 2 -c 10 -c 20 -c 30 -n 10 -r threefry$name; done
-  
-  
+  $ for name in 2x32 2x64; do echo "threefry_$name" && randii uniform01 -k 1 -k 2 -c 10 -c 20 -c 30 -n 10 -r threefry$name; done
   threefry_2x32
   randii: General error: Need 2 digit ctr/key
   Usage: randii uniform01 [OPTION]…
   Try 'randii uniform01 --help' or 'randii --help' for more information.
-  
-  
   threefry_2x64
   randii: General error: Need 2 digit ctr/key
   Usage: randii uniform01 [OPTION]…
@@ -52,9 +44,7 @@ testing the uniform01 generation subcommand errors (2 digit)
   [124]
 
 testing the uniform01 generation subcommand with args (4 digit)
-  $ for name in 4x32 4x64; do echo "\n\nthreefry_$name" && randii uniform01 -k 1 -k 2 -k 3 -k 4 -c 10 -c 20 -c 30 -c 40 -n 10 -r threefry$name; done
-  
-  
+  $ for name in 4x32 4x64; do echo "threefry_$name" && randii uniform01 -k 1 -k 2 -k 3 -k 4 -c 10 -c 20 -c 30 -c 40 -n 10 -r threefry$name; done
   threefry_4x32
   
   0.246938243508
@@ -67,8 +57,6 @@ testing the uniform01 generation subcommand with args (4 digit)
   0.145545294508
   0.572219017893
   0.809060395695
-  
-  
   threefry_4x64
   
   0.335126876831
@@ -83,15 +71,11 @@ testing the uniform01 generation subcommand with args (4 digit)
   0.676166095771
 
 testing the uniform01 generation subcommand errors (4 digit)
-  $ for name in 4x32 4x64; do echo "\n\nthreefry_$name" && randii uniform01 -k 1 -k 2 -c 10 -c 20 -c 30 -n 10 -r threefry$name; done
-  
-  
+  $ for name in 4x32 4x64; do echo "threefry_$name" && randii uniform01 -k 1 -k 2 -c 10 -c 20 -c 30 -n 10 -r threefry$name; done
   threefry_4x32
   randii: General error: Need 4 digit ctr/key
   Usage: randii uniform01 [OPTION]…
   Try 'randii uniform01 --help' or 'randii --help' for more information.
-  
-  
   threefry_4x64
   randii: General error: Need 4 digit ctr/key
   Usage: randii uniform01 [OPTION]…
