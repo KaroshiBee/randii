@@ -1,8 +1,4 @@
 module R = Randii.Rng
-module Threefry_2x32 = Randii.Rng.Threefry_2x32
-module Threefry_2x64 = Randii.Rng.Threefry_2x64
-module Threefry_4x32 = Randii.Rng.Threefry_4x32
-module Threefry_4x64 = Randii.Rng.Threefry_4x64
 
 (* a generic setup for logging *)
 let setup_log =
@@ -20,6 +16,7 @@ let info ~doc name =
     ~doc
     ~version
     name
+
 
 let process rng_name_arg key_arg ctr_arg n_arg kind_arg () =
   let (let*) = Result.bind in

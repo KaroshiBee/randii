@@ -1,111 +1,69 @@
-type two_digits
-type four_digits
+type digits_two
+type digits_four
+type word_32
+type word_64
 
-module Consts = struct
-  type 'a t = {
-    (* rotation amounts *)
-    i_0: 'a;
-    i_1: 'a;
-    i_2: 'a;
-    i_3: 'a;
-    i_4: 'a;
-    i_5: 'a;
-    i_6: 'a;
-    i_7: 'a;
-  }
+(* factor out dependence on UInt32 / UInt64 and word size (32/64 bit) *)
+module type NUM = sig
 
-  let make f i_0 i_1 i_2 i_3 i_4 i_5 i_6 i_7 = {
-    i_0=f i_0;
-    i_1=f i_1;
-    i_2=f i_2;
-    i_3=f i_3;
-    i_4=f i_4;
-    i_5=f i_5;
-    i_6=f i_6;
-    i_7=f i_7;
-  }
-
-  let zeros f = {
-    i_0=f 0;
-    i_1=f 0;
-    i_2=f 0;
-    i_3=f 0;
-    i_4=f 0;
-    i_5=f 0;
-    i_6=f 0;
-    i_7=f 0;
-  }
-
-end
-
-
-(* factor out dependence on UInt32 / UInt64 *)
-module type T = sig
   type digits
-  type t (* UInt32 or UInt64 *)
-  val of_int : int -> t
-  val to_int : t -> int
-  val of_string : string -> t
-  val to_string : t -> string
-  val equal : t -> t -> bool
-  val succ : t -> t
-  val pred : t -> t
-  val zero : t
-  val one : t
-  val max_int : t
-  val add : t -> t -> t
-  val sub : t -> t -> t
-  val rem : t -> t -> t
-  val logxor : t -> t -> t
+  type word
+  type ('digits, 'word) t
 
-  val default_rounds : int
-  val skein_ks_parity : t
-  val rotations_0 : t Consts.t
-  val rotations_1 : t Consts.t
+  (* ctors *)
+  val of_int : int -> (digits, word) t
+  val of_string : string -> (digits, word) t
 
-  val rotL : t -> t -> t
+  (* dtors *)
+  val to_int : ('digits, 'word) t -> int
+  val to_string : ('digits, 'word) t -> string
 
+  (* consts *)
+  val zero : (digits, word) t
+  val one : (digits, word) t
+  val max_int : (digits, word) t
+
+  val skein_ks_parity : (digits, word) t
+  val rotations_0 : (digits, word) t Rotations.t
+  val rotations_1 : (digits, word) t Rotations.t
+  val digits : int
+
+  (* ops *)
+  val equal : ('digits, 'word) t -> ('digits, 'word) t -> bool
+  val succ : ('digits, 'word) t -> ('digits, 'word) t
+  val pred : ('digits, 'word) t -> ('digits, 'word) t
+  val add : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t
+  val sub : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t
+  val rem : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t
+  val logxor : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t
+  val rotL : ('digits, 'word) t -> ('digits, 'word) t -> ('digits, 'word) t
 end
 
-module type T2 = sig
-  include T
-  type digits = two_digits
-end
-
-module type T4 = sig
-  include T
-  type digits = four_digits
-end
-
-type digits = | Two | Four
-
-
-
-module type CTR = sig
-  type el
-  type t
-  val of_string_array : string array -> (t, Errors.t) Result.t
-  val to_string_array : t -> string array
-  val copy : t -> t
-  val succ : t -> t
-  val pred : t -> t
-  val digits : t -> digits
-  val data : t -> el array
-end
 
 (* NOTE also that this implementation swaps around the args key/ctr
    as compared to the original C implementation *)
+module type RNG_MAKER = sig
+  type digits (* sentinal type to allow for constraints *)
+  module Make : functor (Num:NUM) -> sig
+    val rand_R :
+      of_int:(int -> (Num.digits, Num.word) Num.t) ->
+      rounds:int ->
+      key:(Num.digits, Num.word) Num.t array ->
+      ctr:(Num.digits, Num.word) Num.t array ->
+      (Num.digits, Num.word) Num.t array
+  end
+end
 
-module type RAND_T = sig
+
+module type GEN = sig
   type t
-  val rand : key:t -> ctr:t -> t
+  val of_int_array : int array ->  t
+  val to_int_array :  t -> int array
+  val of_string_array : string array ->  t
+  val to_string_array :  t -> string array
+  val succ :  t ->  t
+  val pred :  t ->  t
+  val rand : ?rounds:int -> key:t -> ctr:t -> unit -> t
+  val uniform : ?upper:int -> ?rounds:int -> key:t -> ctr:t -> unit -> int array
+  val uniform01 : ?rounds:int -> key:t -> ctr:t -> unit -> float array
 end
-
-(* expose rand_R for testing purposes *)
-module type RAND_TEST_T = sig
-  include RAND_T
-  val rand_R : rounds:int -> key:t -> ctr:t -> t
-end
-
-
-

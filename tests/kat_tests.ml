@@ -1,14 +1,6 @@
 (* KAT == Known Answer Tests
  * data is taken from Random123 test/ dir *)
 open Randii.Threefry
-module R2x32 = Make_threefry2xW_TEST(UInt32_2_T)
-module R2x64 = Make_threefry2xW_TEST(UInt64_2_T)
-
-module R4x32 = Make_threefry4xW_TEST(UInt32_4_T)
-module R4x64 = Make_threefry4xW_TEST(UInt64_4_T)
-
-module I32 = Unsigned.UInt32
-module I64 = Unsigned.UInt64
 
 module Word_size = Randii.Rng.Word_size
 module Digits = Randii.Rng.Digits
@@ -75,14 +67,22 @@ let read_kat_data ln =
 let test_kat_data i rng_data () =
   let RngData.{name; nrounds; ctr; key; expected} = rng_data in
   let actual = match (name.digits, name.word_size) with
-    | (Two,  ThirtyTwo) -> R2x32.rand_R ~rounds:nrounds ~key:(key |> Array.map I32.of_string) ~ctr:(ctr |> Array.map I32.of_string)
-                           |> Array.map I32.to_string
-    | (Two,  SixtyFour) -> R2x64.rand_R ~rounds:nrounds ~key:(key |> Array.map I64.of_string) ~ctr:(ctr |> Array.map I64.of_string)
-                           |> Array.map I64.to_string
-    | (Four, ThirtyTwo) -> R4x32.rand_R ~rounds:nrounds ~key:(key |> Array.map I32.of_string) ~ctr:(ctr |> Array.map I32.of_string)
-                           |> Array.map I32.to_string
-    | (Four, SixtyFour) -> R4x64.rand_R ~rounds:nrounds ~key:(key |> Array.map I64.of_string) ~ctr:(ctr |> Array.map I64.of_string)
-                           |> Array.map I64.to_string
+    | (Two,  ThirtyTwo) -> Gen_2_32.(
+        rand ~rounds:nrounds ~key:(of_string_array key) ~ctr:(of_string_array ctr) ()
+        |> to_string_array
+      )
+    | (Two,  SixtyFour) -> Gen_2_64.(
+        rand ~rounds:nrounds ~key:(of_string_array key) ~ctr:(of_string_array ctr) ()
+        |> to_string_array
+      )
+    | (Four, ThirtyTwo) -> Gen_4_32.(
+        rand ~rounds:nrounds ~key:(of_string_array key) ~ctr:(of_string_array ctr) ()
+        |> to_string_array
+      )
+    | (Four, SixtyFour) -> Gen_4_64.(
+        rand ~rounds:nrounds ~key:(of_string_array key) ~ctr:(of_string_array ctr) ()
+        |> to_string_array
+      )
   in
   Alcotest.(check (array string))
     (RngName.to_string name ^ (string_of_int i))

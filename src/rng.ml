@@ -1,126 +1,11 @@
-(* Need unbiased transform to [0, n]
- * taken from
- * https://stackoverflow.com/questions/10984974/why-do-people-say-there-is-modulo-bias-when-using-a-random-number-generator
- * // Assumptions
- * // rand() in [0, RAND_MAX]
- * // n in (0, RAND_MAX]
- *
- * int x;
- *
- * // Keep searching for an x in a range divisible by n
- * do {
- *     x = rand();
- * } while (x >= RAND_MAX - (RAND_MAX % n))
- *
- * x %= n; *)
-open Types
+module Threefry_2x32 = Threefry.Gen_2_32
+module Threefry_2x64 = Threefry.Gen_2_64
+module Threefry_4x32 = Threefry.Gen_4_32
+module Threefry_4x64 = Threefry.Gen_4_64
 
-module Maker_
-    (U:T)
-    (Ctr:CTR with type el := U.t)
-    (Rng:RAND_T with type t = U.t array)
-= struct
-
-  let limit n = U.(sub max_int (rem max_int n))
-
-  let unbiased upper r =
-    try
-      (* find first rand less than limit
-       * and do the remainder with that number
-       * error if no number is found *)
-      Array.to_list r
-      |> List.filter (fun x -> x <= limit upper)
-      |> List.map (fun x -> U.rem x upper |> U.to_string)
-      |> Array.of_list
-      |> Ctr.of_string_array
-    with
-    | Invalid_argument _ -> Result.error @@ `Error (Printf.sprintf "Bad ctr/key pair for given ~upper:%s" @@ U.to_string upper)
-
-  let rand2 ~key ~ctr =
-    match (Ctr.digits ctr, Ctr.digits key) with
-    | (Two, Two) ->
-      Rng.rand ~key:(Ctr.data key) ~ctr:(Ctr.data ctr)
-      |> Array.map U.to_string
-      |> Ctr.of_string_array
-    | _ -> Result.error @@ `Error "Need two digit ctr/key"
-
-  let uniform2 ~(upper:int) ~key ~ctr =
-    let upper = U.of_int upper in
-    if U.equal U.zero upper then Result.error @@ `Error "zero upper" else
-      match (Ctr.digits ctr, Ctr.digits key) with
-      | (Two, Two) ->
-        Rng.rand ~key:(Ctr.data key) ~ctr:(Ctr.data ctr)
-        |> unbiased upper
-      | _ -> Result.error @@ `Error "Need two digit ctr/key"
-
-  let rand4 ~key ~ctr =
-    match (Ctr.digits ctr, Ctr.digits key) with
-    | (Four, Four) ->
-      Rng.rand ~key:(Ctr.data key) ~ctr:(Ctr.data ctr)
-      |> Array.map U.to_string
-      |> Ctr.of_string_array
-    | _ -> Result.error @@ `Error "Need four digit ctr/key"
-
-  let uniform4 ~(upper:int) ~key ~ctr =
-    let upper = U.of_int upper in
-    if U.equal U.zero upper then Result.error @@ `Error "zero upper" else
-      match (Ctr.digits ctr, Ctr.digits key) with
-      | (Four, Four) ->
-        Rng.rand ~key:(Ctr.data key) ~ctr:(Ctr.data ctr)
-        |> unbiased upper
-      | _ -> Result.error @@ `Error "Need four digit ctr/key"
-
-end
-
-module type DISCRETE = sig
-  type t
-
-  val incr : t -> t
-  val rand : key:t -> ctr:t -> (t, Errors.t) Result.t
-  val uniform : upper:int -> key:t -> ctr:t -> (t, Errors.t) Result.t
-
-  val to_string_array : t -> string array
-  val of_string_array : string array -> (t, Errors.t) Result.t
-end
-
-module Make_discrete2xW (U:T2) : DISCRETE = struct
-
-  module Ctr = Ctr.Make_ctr(U)
-  module Rng = Threefry.Make_threefry2xW(U)
-
-  open Maker_(U) (Ctr) (Rng)
-
-  type t = Ctr.t
-
-  let incr = Ctr.succ
-  let rand = rand2
-  let uniform = uniform2
-
-  let to_string_array = Ctr.to_string_array
-  let of_string_array = Ctr.of_string_array
-end
-
-module Make_discrete4xW (U:T4) : DISCRETE = struct
-
-  module Ctr = Ctr.Make_ctr(U)
-  module Rng = Threefry.Make_threefry4xW(U)
-
-  open Maker_(U) (Ctr) (Rng)
-
-  type t = Ctr.t
-
-  let incr = Ctr.succ
-  let rand = rand4
-  let uniform = uniform4
-
-  let to_string_array = Ctr.to_string_array
-  let of_string_array = Ctr.of_string_array
-end
-
-module Threefry_2x32 = Make_discrete2xW(Threefry.UInt32_2_T)
-module Threefry_2x64 = Make_discrete2xW(Threefry.UInt64_2_T)
-module Threefry_4x32 = Make_discrete4xW(Threefry.UInt32_4_T)
-module Threefry_4x64 = Make_discrete4xW(Threefry.UInt64_4_T)
+type kind =
+    Rand
+  | Uniform of int
 
 module Word_size = struct
   type t = | ThirtyTwo | SixtyFour
@@ -199,10 +84,6 @@ module RngName = struct
 
 end
 
-type kind =
-    Rand
-  | Uniform of int
-
 
 let gen ~rng_name_arg ?key_arg ?ctr_arg n kind =
   let (let*) = Result.bind in
@@ -213,30 +94,46 @@ let gen ~rng_name_arg ?key_arg ?ctr_arg n kind =
   let ctr4 = [|"0";"1";"2";"3"|] in
 
   let* {word_size; digits; algo} = RngName.of_string rng_name_arg in
-  let rand ?key_arg ?ctr_arg = function
+  let rand ?key_arg ?ctr_arg =
+    let _convert arg converter ~default =
+      try
+        Result.ok @@ converter @@ Option.value arg ~default
+      with
+      | Invalid_argument s ->
+        Result.error @@ `Error s
+    in
+    function
     | Word_size.ThirtyTwo, Digits.Two, Algo.Threefry -> Threefry_2x32.(
-        let* key = of_string_array @@ Option.value key_arg ~default:key2 in
-        let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr2 in
-        let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
-        Result.ok (to_string_array arr, incr ctr |> to_string_array)
+        let* key = _convert key_arg of_string_array ~default:key2 in
+        let* ctr = _convert ctr_arg of_string_array ~default:ctr2 in
+        let arr = match kind with
+          | Rand -> rand ~key ~ctr () |> to_string_array
+          | Uniform upper -> uniform ~upper ~key ~ctr () |> of_int_array |> to_string_array in
+        Result.ok (arr, succ ctr |> to_string_array)
       )
     | Word_size.ThirtyTwo, Digits.Four, Algo.Threefry -> Threefry_4x32.(
-        let* key = of_string_array @@ Option.value key_arg ~default:key4 in
-        let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr4 in
-        let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
-        Result.ok (to_string_array arr, incr ctr |> to_string_array)
+        let* key = _convert key_arg of_string_array ~default:key4 in
+        let* ctr = _convert ctr_arg of_string_array ~default:ctr4 in
+        let arr = match kind with
+          | Rand -> rand ~key ~ctr () |> to_string_array
+          | Uniform upper -> uniform ~upper ~key ~ctr () |> of_int_array |> to_string_array in
+        Result.ok (arr, succ ctr |> to_string_array)
       )
     | Word_size.SixtyFour, Digits.Two, Algo.Threefry -> Threefry_2x64.(
-        let* key = of_string_array @@ Option.value key_arg ~default:key2 in
-        let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr2 in
-        let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
-        Result.ok (to_string_array arr, incr ctr |> to_string_array)
+        let* key = _convert key_arg of_string_array ~default:key2 in
+        let* ctr = _convert ctr_arg of_string_array ~default:ctr2 in
+        let arr = match kind with
+          | Rand -> rand ~key ~ctr () |> to_string_array
+          | Uniform upper -> uniform ~upper ~key ~ctr () |> of_int_array |> to_string_array in
+        Result.ok (arr, succ ctr |> to_string_array)
       )
     | Word_size.SixtyFour, Digits.Four, Algo.Threefry -> Threefry_4x64.(
-        let* key = of_string_array @@ Option.value key_arg ~default:key4 in
-        let* ctr = of_string_array @@ Option.value ctr_arg ~default:ctr4 in
-        let* arr = match kind with Rand -> rand ~key ~ctr | Uniform upper -> uniform ~upper ~key ~ctr in
-        Result.ok (to_string_array arr, incr ctr |> to_string_array)
+        let* key = _convert key_arg of_string_array ~default:key4 in
+        let* ctr = _convert ctr_arg of_string_array ~default:ctr4 in
+        let arr = match kind with
+          | Rand -> rand ~key ~ctr () |> to_string_array
+          | Uniform upper -> uniform ~upper ~key ~ctr () |> of_int_array |> to_string_array in
+        Result.ok (arr, succ ctr |> to_string_array)
       )
   in
   let rec aux :
