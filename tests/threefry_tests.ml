@@ -1,7 +1,7 @@
-module R2x32 = Randii.Threefry.Gen_2_32
-module R2x64 = Randii.Threefry.Gen_2_64
-module R4x32 = Randii.Threefry.Gen_4_32
-module R4x64 = Randii.Threefry.Gen_4_64
+module R2x32 = Cbrn.Threefry.Gen_2_32
+module R2x64 = Cbrn.Threefry.Gen_2_64
+module R4x32 = Cbrn.Threefry.Gen_4_32
+module R4x64 = Cbrn.Threefry.Gen_4_64
 
 module I32 = Unsigned.UInt32
 module I64 = Unsigned.UInt64

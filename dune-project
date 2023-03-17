@@ -1,6 +1,6 @@
 (lang dune 3.0)
 (name randii)
-(version 1.0.0) ;; TODO make sure same as in Utils.Version
+(version 1.0) ;; TODO make sure same as in Utils.Version
 
 (generate_opam_files true)
 

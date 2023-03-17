@@ -1,11 +1,11 @@
 (* KAT == Known Answer Tests
  * data is taken from Random123 test/ dir *)
-open Randii.Threefry
+open Cbrn.Threefry
 
-module Word_size = Randii.Rng.Word_size
-module Digits = Randii.Rng.Digits
-module Algo = Randii.Rng.Algo
-module RngName = Randii.Rng.RngName
+module Word_size = Cbrn.Rng.Word_size
+module Digits = Cbrn.Rng.Digits
+module Algo = Cbrn.Rng.Algo
+module RngName = Cbrn.Rng.RngName
 
 module RngData = struct
   type t = {
@@ -62,7 +62,7 @@ let read_lines name : string list =
 let read_kat_data ln =
   match RngData.of_string ln with
   | Result.Ok v -> Some v
-  | Result.Error e -> let () = Logs.warn (fun m -> m "Error: %s\nLine: %s" (Randii.Errors.to_string e) ln) in None
+  | Result.Error e -> let () = Logs.warn (fun m -> m "Error: %s\nLine: %s" (Cbrn.Errors.to_string e) ln) in None
 
 let test_kat_data i rng_data () =
   let RngData.{name; nrounds; ctr; key; expected} = rng_data in

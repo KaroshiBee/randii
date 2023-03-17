@@ -1,4 +1,4 @@
-module R = Randii.Rng
+module R = Cbrn.Rng
 
 (* a generic setup for logging *)
 let setup_log =
@@ -48,7 +48,7 @@ let process rng_name_arg key_arg ctr_arg n_arg kind_arg () =
 
   match p () with
   | Result.Ok () -> `Ok ()
-  | Result.Error e -> `Error (true, (Randii.Errors.to_string e))
+  | Result.Error e -> `Error (true, (Cbrn.Errors.to_string e))
 
 module Common = struct
   open Cmdliner

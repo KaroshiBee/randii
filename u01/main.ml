@@ -1,5 +1,5 @@
 
-module Make (T:Randii.Types.GEN) = struct
+module Make (T:Cbrn.Types.GEN) = struct
   let key = ref @@ T.of_int_array @@ Array.init T.digits (fun _ -> 0)
   let ctr = ref @@ T.of_int_array @@ Array.init T.digits (fun _ -> 0)
   let xs = ref [||]
@@ -43,10 +43,10 @@ module Make (T:Randii.Types.GEN) = struct
         bits ()
 end
 
-module Rng_2x32 = Make (Randii.Rng.Threefry_2x32)
-module Rng_2x64 = Make (Randii.Rng.Threefry_2x64)
-module Rng_4x32 = Make (Randii.Rng.Threefry_4x32)
-module Rng_4x64 = Make (Randii.Rng.Threefry_4x64)
+module Rng_2x32 = Make (Cbrn.Rng.Threefry_2x32)
+module Rng_2x64 = Make (Cbrn.Rng.Threefry_2x64)
+module Rng_4x32 = Make (Cbrn.Rng.Threefry_4x32)
+module Rng_4x64 = Make (Cbrn.Rng.Threefry_4x64)
 
 open TestU01
 

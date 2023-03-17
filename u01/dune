@@ -1,9 +1,9 @@
 (executable
  (name main)
- (public_name randii.u01_test)
+ (public_name smallcrush)
  (libraries
    testu01
    utils
-   randii
+   cbrn
    logs
 ))

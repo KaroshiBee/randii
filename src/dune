@@ -1,5 +1,5 @@
 (library
- (name randii)
- (public_name randii)
+ (name cbrn)
+ (public_name randii.cbrn)
  (libraries integers logs)
  (instrumentation (backend bisect_ppx)))

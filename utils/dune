@@ -1,5 +1,5 @@
 (library
  (name utils)
  (public_name randii.utils)
- (libraries integers randii)
+ (libraries integers cbrn)
  (instrumentation (backend bisect_ppx)))

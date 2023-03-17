@@ -1,4 +1,4 @@
-open Randii.Types
+open Cbrn.Types
 
 module Ctr2_test (C:GEN) = struct
 
@@ -95,10 +95,10 @@ module Ctr4_test (C:GEN) = struct
       (fun () -> let _ = C.of_int_array zs in ())
 
 end
-module T32_2 = Ctr2_test (Randii.Threefry.Gen_2_32)
-module T64_2 = Ctr2_test (Randii.Threefry.Gen_2_64)
-module T32_4 = Ctr4_test (Randii.Threefry.Gen_4_32)
-module T64_4 = Ctr4_test (Randii.Threefry.Gen_4_64)
+module T32_2 = Ctr2_test (Cbrn.Threefry.Gen_2_32)
+module T64_2 = Ctr2_test (Cbrn.Threefry.Gen_2_64)
+module T32_4 = Ctr4_test (Cbrn.Threefry.Gen_4_32)
+module T64_4 = Ctr4_test (Cbrn.Threefry.Gen_4_64)
 
 let () =
   Alcotest.run "Counter Unittests"
