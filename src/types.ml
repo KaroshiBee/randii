@@ -67,4 +67,5 @@ module type GEN = sig
   val uniform : ?upper:int -> ?rounds:int -> key:t -> ctr:t -> unit -> int array
   val uniform01 : ?rounds:int -> key:t -> ctr:t -> unit -> float array
   val digits : int
+  val is_zero : t -> bool
 end

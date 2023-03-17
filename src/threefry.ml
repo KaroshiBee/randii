@@ -141,6 +141,9 @@ module Make
 
   let digits = Num.digits
 
+  let num_equal_zero = Num.equal Num.zero
+  let is_zero = Array.for_all num_equal_zero
+
 end
 
 module Gen_2_32 = Make (Num_uint32_2) (Rng_threefry_2_digits)
