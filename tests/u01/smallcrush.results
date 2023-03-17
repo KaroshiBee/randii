@@ -1,0 +1,1332 @@
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                 Starting SmallCrush
+                 Version: TestU01 1.2.3
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x32
+
+
+smarsa_BirthdaySpacings test:
+-----------------------------------------------
+   N =  1,  n = 5000000,  r =  0,    d = 1073741824,    t = 2,    p = 1
+
+
+      Number of cells = d^t = 1152921504606846976
+      Lambda = Poisson mean =      27.1051
+
+
+----------------------------------------------------
+Total expected number = N*Lambda      :      27.11
+Total observed number                 :      31
+p-value of test                       :    0.25
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:14.05
+
+Generator state:
+
+
+
+
+***********************************************************
+Test sknuth_Collision calling smultin_Multinomial
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x32
+
+
+smultin_Multinomial test:
+-----------------------------------------------
+   N =  1,  n = 5000000,  r =  0,   d = 65536,   t =  2,
+       Sparse =   TRUE
+
+       GenerCell = smultin_GenerCellSerial
+       Number of cells = d^t =         4294967296
+       Expected number per cell =  1 /  858.99346
+       EColl = n^2 / (2k) =  2910.383046
+       Hashing =   TRUE
+
+       Collision test,    Mu =      2909.2534,    Sigma =    53.8957
+
+-----------------------------------------------
+Test Results for Collisions
+
+Expected number of collisions = Mu    :     2909.25
+Observed number of collisions         :     2845
+p-value of test                       :    0.88
+
+-----------------------------
+Total number of cells containing j balls
+
+  j =  0                              :       4289970141
+  j =  1                              :          4994311
+  j =  2                              :             2843
+  j =  3                              :                1
+  j =  4                              :                0
+  j =  5                              :                0
+
+-----------------------------------------------
+CPU time used                    :  00:00:14.17
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x32
+
+
+sknuth_Gap test:
+-----------------------------------------------
+   N =  1,  n = 200000,  r = 22,   Alpha =        0,   Beta  = 0.00390625
+
+
+-----------------------------------------------
+Number of degrees of freedom          : 1114
+Chi-square statistic                  : 1095.51
+p-value of test                       :    0.65
+
+-----------------------------------------------
+CPU time used                    :  00:01:08.79
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x32
+
+
+sknuth_SimpPoker test:
+-----------------------------------------------
+   N =  1,  n = 400000,  r = 24,   d =   64,   k =   64
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   19
+Chi-square statistic                  :   19.11
+p-value of test                       :    0.45
+
+-----------------------------------------------
+CPU time used                    :  00:00:34.21
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x32
+
+
+sknuth_CouponCollector test:
+-----------------------------------------------
+   N =  1,  n = 500000,  r = 26,   d =   16
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   44
+Chi-square statistic                  :   34.94
+p-value of test                       :    0.83
+
+-----------------------------------------------
+CPU time used                    :  00:00:33.18
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x32
+
+
+sknuth_MaxOft test:
+-----------------------------------------------
+   N =  1,  n = 2000000,  r =  0,   d = 100000,   t =  6
+
+      Number of categories = 100000
+      Expected number per category  = 20.00
+
+
+-----------------------------------------------
+Number of degrees of freedom          : 99999
+Chi-square statistic                  :99520.60
+p-value of test                       :    0.86
+
+
+-----------------------------------------------
+Anderson-Darling statistic            : 2.06e-3
+p-value of test                       :    0.9979
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:16.31
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x32
+
+
+svaria_WeightDistrib test:
+-----------------------------------------------
+   N =  1,  n = 200000,  r = 27,  k = 256,  Alpha =      0,  Beta =  0.125
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   41
+Chi-square statistic                  :   46.21
+p-value of test                       :    0.27
+
+-----------------------------------------------
+CPU time used                    :  00:01:08.78
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x32
+
+
+smarsa_MatrixRank test:
+-----------------------------------------------
+   N =  1,  n = 20000,  r = 20,    s = 10,    L = 60,    k = 60
+
+
+-----------------------------------------------
+Number of degrees of freedom          :    3
+Chi-square statistic                  :    2.73
+p-value of test                       :    0.44
+
+-----------------------------------------------
+CPU time used                    :  00:00:09.89
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x32
+
+
+sstring_HammingIndep test:
+-----------------------------------------------
+   N =  1,  n = 500000,  r = 20,   s = 10,   L = 300,   d = 0
+
+
+
+Counters with expected numbers >= 10
+-----------------------------------------------
+Number of degrees of freedom          : 2209
+Chi-square statistic                  : 2103.87
+p-value of test                       :    0.94
+
+-----------------------------------------------
+CPU time used                    :  00:00:40.37
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x32
+
+
+swalk_RandomWalk1 test:
+-----------------------------------------------
+   N =  1,  n = 1000000,  r =  0,   s = 30,   L0 =  150,   L1 =  150
+
+
+
+-----------------------------------------------
+Test on the values of the Statistic H
+
+Number of degrees of freedom          :   52
+ChiSquare statistic                   :   53.93
+p-value of test                       :    0.40
+
+
+-----------------------------------------------
+Test on the values of the Statistic M
+
+Number of degrees of freedom          :   52
+ChiSquare statistic                   :   65.03
+p-value of test                       :    0.11
+
+
+-----------------------------------------------
+Test on the values of the Statistic J
+
+Number of degrees of freedom          :   75
+ChiSquare statistic                   :   80.53
+p-value of test                       :    0.31
+
+
+-----------------------------------------------
+Test on the values of the Statistic R
+
+Number of degrees of freedom          :   44
+ChiSquare statistic                   :   43.78
+p-value of test                       :    0.48
+
+
+-----------------------------------------------
+Test on the values of the Statistic C
+
+Number of degrees of freedom          :   26
+ChiSquare statistic                   :   17.73
+p-value of test                       :    0.89
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:07.17
+
+Generator state:
+
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        randii 2x32
+ Number of statistics:  15
+ Total CPU time:   00:05:06.95
+
+ All tests were passed
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                 Starting SmallCrush
+                 Version: TestU01 1.2.3
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x64
+
+
+smarsa_BirthdaySpacings test:
+-----------------------------------------------
+   N =  1,  n = 5000000,  r =  0,    d = 1073741824,    t = 2,    p = 1
+
+
+      Number of cells = d^t = 1152921504606846976
+      Lambda = Poisson mean =      27.1051
+
+
+----------------------------------------------------
+Total expected number = N*Lambda      :      27.11
+Total observed number                 :      28
+p-value of test                       :    0.46
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:10.69
+
+Generator state:
+
+
+
+
+***********************************************************
+Test sknuth_Collision calling smultin_Multinomial
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x64
+
+
+smultin_Multinomial test:
+-----------------------------------------------
+   N =  1,  n = 5000000,  r =  0,   d = 65536,   t =  2,
+       Sparse =   TRUE
+
+       GenerCell = smultin_GenerCellSerial
+       Number of cells = d^t =         4294967296
+       Expected number per cell =  1 /  858.99346
+       EColl = n^2 / (2k) =  2910.383046
+       Hashing =   TRUE
+
+       Collision test,    Mu =      2909.2534,    Sigma =    53.8957
+
+-----------------------------------------------
+Test Results for Collisions
+
+Expected number of collisions = Mu    :     2909.25
+Observed number of collisions         :     2816
+p-value of test                       :    0.96
+
+-----------------------------
+Total number of cells containing j balls
+
+  j =  0                              :       4289970112
+  j =  1                              :          4994368
+  j =  2                              :             2816
+  j =  3                              :                0
+  j =  4                              :                0
+  j =  5                              :                0
+
+-----------------------------------------------
+CPU time used                    :  00:00:10.97
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x64
+
+
+sknuth_Gap test:
+-----------------------------------------------
+   N =  1,  n = 200000,  r = 22,   Alpha =        0,   Beta  = 0.00390625
+
+
+-----------------------------------------------
+Number of degrees of freedom          : 1114
+Chi-square statistic                  : 1090.53
+p-value of test                       :    0.69
+
+-----------------------------------------------
+CPU time used                    :  00:00:52.14
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x64
+
+
+sknuth_SimpPoker test:
+-----------------------------------------------
+   N =  1,  n = 400000,  r = 24,   d =   64,   k =   64
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   19
+Chi-square statistic                  :   22.70
+p-value of test                       :    0.25
+
+-----------------------------------------------
+CPU time used                    :  00:00:26.00
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x64
+
+
+sknuth_CouponCollector test:
+-----------------------------------------------
+   N =  1,  n = 500000,  r = 26,   d =   16
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   44
+Chi-square statistic                  :   76.70
+p-value of test                       :  1.6e-3
+
+-----------------------------------------------
+CPU time used                    :  00:00:24.93
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x64
+
+
+sknuth_MaxOft test:
+-----------------------------------------------
+   N =  1,  n = 2000000,  r =  0,   d = 100000,   t =  6
+
+      Number of categories = 100000
+      Expected number per category  = 20.00
+
+
+-----------------------------------------------
+Number of degrees of freedom          : 99999
+Chi-square statistic                  : 1.00e+5
+p-value of test                       :    0.42
+
+
+-----------------------------------------------
+Anderson-Darling statistic            :    0.37
+p-value of test                       :    0.63
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:12.27
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x64
+
+
+svaria_WeightDistrib test:
+-----------------------------------------------
+   N =  1,  n = 200000,  r = 27,  k = 256,  Alpha =      0,  Beta =  0.125
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   41
+Chi-square statistic                  :   51.30
+p-value of test                       :    0.13
+
+-----------------------------------------------
+CPU time used                    :  00:00:51.67
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x64
+
+
+smarsa_MatrixRank test:
+-----------------------------------------------
+   N =  1,  n = 20000,  r = 20,    s = 10,    L = 60,    k = 60
+
+
+-----------------------------------------------
+Number of degrees of freedom          :    3
+Chi-square statistic                  :    5.66
+p-value of test                       :    0.13
+
+-----------------------------------------------
+CPU time used                    :  00:00:07.50
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x64
+
+
+sstring_HammingIndep test:
+-----------------------------------------------
+   N =  1,  n = 500000,  r = 20,   s = 10,   L = 300,   d = 0
+
+
+
+Counters with expected numbers >= 10
+-----------------------------------------------
+Number of degrees of freedom          : 2209
+Chi-square statistic                  : 2267.68
+p-value of test                       :    0.19
+
+-----------------------------------------------
+CPU time used                    :  00:00:30.33
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 2x64
+
+
+swalk_RandomWalk1 test:
+-----------------------------------------------
+   N =  1,  n = 1000000,  r =  0,   s = 30,   L0 =  150,   L1 =  150
+
+
+
+-----------------------------------------------
+Test on the values of the Statistic H
+
+Number of degrees of freedom          :   52
+ChiSquare statistic                   :   58.83
+p-value of test                       :    0.24
+
+
+-----------------------------------------------
+Test on the values of the Statistic M
+
+Number of degrees of freedom          :   52
+ChiSquare statistic                   :   56.82
+p-value of test                       :    0.30
+
+
+-----------------------------------------------
+Test on the values of the Statistic J
+
+Number of degrees of freedom          :   75
+ChiSquare statistic                   :   83.49
+p-value of test                       :    0.23
+
+
+-----------------------------------------------
+Test on the values of the Statistic R
+
+Number of degrees of freedom          :   44
+ChiSquare statistic                   :   40.34
+p-value of test                       :    0.63
+
+
+-----------------------------------------------
+Test on the values of the Statistic C
+
+Number of degrees of freedom          :   26
+ChiSquare statistic                   :   27.47
+p-value of test                       :    0.39
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:05.49
+
+Generator state:
+
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        randii 2x64
+ Number of statistics:  15
+ Total CPU time:   00:03:52.04
+
+ All tests were passed
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                 Starting SmallCrush
+                 Version: TestU01 1.2.3
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x32
+
+
+smarsa_BirthdaySpacings test:
+-----------------------------------------------
+   N =  1,  n = 5000000,  r =  0,    d = 1073741824,    t = 2,    p = 1
+
+
+      Number of cells = d^t = 1152921504606846976
+      Lambda = Poisson mean =      27.1051
+
+
+----------------------------------------------------
+Total expected number = N*Lambda      :      27.11
+Total observed number                 :      28
+p-value of test                       :    0.46
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:14.25
+
+Generator state:
+
+
+
+
+***********************************************************
+Test sknuth_Collision calling smultin_Multinomial
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x32
+
+
+smultin_Multinomial test:
+-----------------------------------------------
+   N =  1,  n = 5000000,  r =  0,   d = 65536,   t =  2,
+       Sparse =   TRUE
+
+       GenerCell = smultin_GenerCellSerial
+       Number of cells = d^t =         4294967296
+       Expected number per cell =  1 /  858.99346
+       EColl = n^2 / (2k) =  2910.383046
+       Hashing =   TRUE
+
+       Collision test,    Mu =      2909.2534,    Sigma =    53.8957
+
+-----------------------------------------------
+Test Results for Collisions
+
+Expected number of collisions = Mu    :     2909.25
+Observed number of collisions         :     3001
+p-value of test                       :    0.05
+
+-----------------------------
+Total number of cells containing j balls
+
+  j =  0                              :       4289970297
+  j =  1                              :          4993998
+  j =  2                              :             3001
+  j =  3                              :                0
+  j =  4                              :                0
+  j =  5                              :                0
+
+-----------------------------------------------
+CPU time used                    :  00:00:14.30
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x32
+
+
+sknuth_Gap test:
+-----------------------------------------------
+   N =  1,  n = 200000,  r = 22,   Alpha =        0,   Beta  = 0.00390625
+
+
+-----------------------------------------------
+Number of degrees of freedom          : 1114
+Chi-square statistic                  : 1160.94
+p-value of test                       :    0.16
+
+-----------------------------------------------
+CPU time used                    :  00:01:09.39
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x32
+
+
+sknuth_SimpPoker test:
+-----------------------------------------------
+   N =  1,  n = 400000,  r = 24,   d =   64,   k =   64
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   19
+Chi-square statistic                  :   21.60
+p-value of test                       :    0.30
+
+-----------------------------------------------
+CPU time used                    :  00:00:34.69
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x32
+
+
+sknuth_CouponCollector test:
+-----------------------------------------------
+   N =  1,  n = 500000,  r = 26,   d =   16
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   44
+Chi-square statistic                  :   37.59
+p-value of test                       :    0.74
+
+-----------------------------------------------
+CPU time used                    :  00:00:33.49
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x32
+
+
+sknuth_MaxOft test:
+-----------------------------------------------
+   N =  1,  n = 2000000,  r =  0,   d = 100000,   t =  6
+
+      Number of categories = 100000
+      Expected number per category  = 20.00
+
+
+-----------------------------------------------
+Number of degrees of freedom          : 99999
+Chi-square statistic                  : 1.00e+5
+p-value of test                       :    0.22
+
+
+-----------------------------------------------
+Anderson-Darling statistic            :    0.16
+p-value of test                       :    0.84
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:16.48
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x32
+
+
+svaria_WeightDistrib test:
+-----------------------------------------------
+   N =  1,  n = 200000,  r = 27,  k = 256,  Alpha =      0,  Beta =  0.125
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   41
+Chi-square statistic                  :   38.53
+p-value of test                       :    0.58
+
+-----------------------------------------------
+CPU time used                    :  00:01:09.20
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x32
+
+
+smarsa_MatrixRank test:
+-----------------------------------------------
+   N =  1,  n = 20000,  r = 20,    s = 10,    L = 60,    k = 60
+
+
+-----------------------------------------------
+Number of degrees of freedom          :    3
+Chi-square statistic                  :    2.28
+p-value of test                       :    0.52
+
+-----------------------------------------------
+CPU time used                    :  00:00:09.95
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x32
+
+
+sstring_HammingIndep test:
+-----------------------------------------------
+   N =  1,  n = 500000,  r = 20,   s = 10,   L = 300,   d = 0
+
+
+
+Counters with expected numbers >= 10
+-----------------------------------------------
+Number of degrees of freedom          : 2209
+Chi-square statistic                  : 2252.99
+p-value of test                       :    0.25
+
+-----------------------------------------------
+CPU time used                    :  00:00:40.78
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x32
+
+
+swalk_RandomWalk1 test:
+-----------------------------------------------
+   N =  1,  n = 1000000,  r =  0,   s = 30,   L0 =  150,   L1 =  150
+
+
+
+-----------------------------------------------
+Test on the values of the Statistic H
+
+Number of degrees of freedom          :   52
+ChiSquare statistic                   :   61.06
+p-value of test                       :    0.18
+
+
+-----------------------------------------------
+Test on the values of the Statistic M
+
+Number of degrees of freedom          :   52
+ChiSquare statistic                   :   60.33
+p-value of test                       :    0.20
+
+
+-----------------------------------------------
+Test on the values of the Statistic J
+
+Number of degrees of freedom          :   75
+ChiSquare statistic                   :   68.99
+p-value of test                       :    0.67
+
+
+-----------------------------------------------
+Test on the values of the Statistic R
+
+Number of degrees of freedom          :   44
+ChiSquare statistic                   :   54.14
+p-value of test                       :    0.14
+
+
+-----------------------------------------------
+Test on the values of the Statistic C
+
+Number of degrees of freedom          :   26
+ChiSquare statistic                   :   30.51
+p-value of test                       :    0.25
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:07.15
+
+Generator state:
+
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        randii 4x32
+ Number of statistics:  15
+ Total CPU time:   00:05:09.73
+
+ All tests were passed
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                 Starting SmallCrush
+                 Version: TestU01 1.2.3
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x64
+
+
+smarsa_BirthdaySpacings test:
+-----------------------------------------------
+   N =  1,  n = 5000000,  r =  0,    d = 1073741824,    t = 2,    p = 1
+
+
+      Number of cells = d^t = 1152921504606846976
+      Lambda = Poisson mean =      27.1051
+
+
+----------------------------------------------------
+Total expected number = N*Lambda      :      27.11
+Total observed number                 :      31
+p-value of test                       :    0.25
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:10.75
+
+Generator state:
+
+
+
+
+***********************************************************
+Test sknuth_Collision calling smultin_Multinomial
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x64
+
+
+smultin_Multinomial test:
+-----------------------------------------------
+   N =  1,  n = 5000000,  r =  0,   d = 65536,   t =  2,
+       Sparse =   TRUE
+
+       GenerCell = smultin_GenerCellSerial
+       Number of cells = d^t =         4294967296
+       Expected number per cell =  1 /  858.99346
+       EColl = n^2 / (2k) =  2910.383046
+       Hashing =   TRUE
+
+       Collision test,    Mu =      2909.2534,    Sigma =    53.8957
+
+-----------------------------------------------
+Test Results for Collisions
+
+Expected number of collisions = Mu    :     2909.25
+Observed number of collisions         :     2907
+p-value of test                       :    0.51
+
+-----------------------------
+Total number of cells containing j balls
+
+  j =  0                              :       4289970203
+  j =  1                              :          4994188
+  j =  2                              :             2903
+  j =  3                              :                2
+  j =  4                              :                0
+  j =  5                              :                0
+
+-----------------------------------------------
+CPU time used                    :  00:00:10.87
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x64
+
+
+sknuth_Gap test:
+-----------------------------------------------
+   N =  1,  n = 200000,  r = 22,   Alpha =        0,   Beta  = 0.00390625
+
+
+-----------------------------------------------
+Number of degrees of freedom          : 1114
+Chi-square statistic                  : 1169.31
+p-value of test                       :    0.12
+
+-----------------------------------------------
+CPU time used                    :  00:00:51.02
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x64
+
+
+sknuth_SimpPoker test:
+-----------------------------------------------
+   N =  1,  n = 400000,  r = 24,   d =   64,   k =   64
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   19
+Chi-square statistic                  :   15.62
+p-value of test                       :    0.68
+
+-----------------------------------------------
+CPU time used                    :  00:00:25.60
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x64
+
+
+sknuth_CouponCollector test:
+-----------------------------------------------
+   N =  1,  n = 500000,  r = 26,   d =   16
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   44
+Chi-square statistic                  :   40.98
+p-value of test                       :    0.60
+
+-----------------------------------------------
+CPU time used                    :  00:00:24.73
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x64
+
+
+sknuth_MaxOft test:
+-----------------------------------------------
+   N =  1,  n = 2000000,  r =  0,   d = 100000,   t =  6
+
+      Number of categories = 100000
+      Expected number per category  = 20.00
+
+
+-----------------------------------------------
+Number of degrees of freedom          : 99999
+Chi-square statistic                  :99113.10
+p-value of test                       :    0.98
+
+
+-----------------------------------------------
+Anderson-Darling statistic            :   0.058
+p-value of test                       :    0.94
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:12.20
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x64
+
+
+svaria_WeightDistrib test:
+-----------------------------------------------
+   N =  1,  n = 200000,  r = 27,  k = 256,  Alpha =      0,  Beta =  0.125
+
+
+-----------------------------------------------
+Number of degrees of freedom          :   41
+Chi-square statistic                  :   52.86
+p-value of test                       :    0.10
+
+-----------------------------------------------
+CPU time used                    :  00:00:51.05
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x64
+
+
+smarsa_MatrixRank test:
+-----------------------------------------------
+   N =  1,  n = 20000,  r = 20,    s = 10,    L = 60,    k = 60
+
+
+-----------------------------------------------
+Number of degrees of freedom          :    3
+Chi-square statistic                  :    1.44
+p-value of test                       :    0.70
+
+-----------------------------------------------
+CPU time used                    :  00:00:07.42
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x64
+
+
+sstring_HammingIndep test:
+-----------------------------------------------
+   N =  1,  n = 500000,  r = 20,   s = 10,   L = 300,   d = 0
+
+
+
+Counters with expected numbers >= 10
+-----------------------------------------------
+Number of degrees of freedom          : 2209
+Chi-square statistic                  : 2129.07
+p-value of test                       :    0.89
+
+-----------------------------------------------
+CPU time used                    :  00:00:30.05
+
+Generator state:
+
+
+
+
+***********************************************************
+HOST = kbee-ubuntu-2204, Linux
+
+randii 4x64
+
+
+swalk_RandomWalk1 test:
+-----------------------------------------------
+   N =  1,  n = 1000000,  r =  0,   s = 30,   L0 =  150,   L1 =  150
+
+
+
+-----------------------------------------------
+Test on the values of the Statistic H
+
+Number of degrees of freedom          :   52
+ChiSquare statistic                   :   50.14
+p-value of test                       :    0.55
+
+
+-----------------------------------------------
+Test on the values of the Statistic M
+
+Number of degrees of freedom          :   52
+ChiSquare statistic                   :   53.89
+p-value of test                       :    0.40
+
+
+-----------------------------------------------
+Test on the values of the Statistic J
+
+Number of degrees of freedom          :   75
+ChiSquare statistic                   :   74.49
+p-value of test                       :    0.49
+
+
+-----------------------------------------------
+Test on the values of the Statistic R
+
+Number of degrees of freedom          :   44
+ChiSquare statistic                   :   46.28
+p-value of test                       :    0.38
+
+
+-----------------------------------------------
+Test on the values of the Statistic C
+
+Number of degrees of freedom          :   26
+ChiSquare statistic                   :   21.42
+p-value of test                       :    0.72
+
+
+-----------------------------------------------
+CPU time used                    :  00:00:05.40
+
+Generator state:
+
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        randii 4x64
+ Number of statistics:  15
+ Total CPU time:   00:03:49.13
+
+ All tests were passed
+
+
+
