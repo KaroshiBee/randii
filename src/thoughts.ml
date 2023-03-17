@@ -14,6 +14,12 @@ module type NUM = sig
   (* ctors *)
   val of_int : int -> (digits, word) t
   val of_string : string -> (digits, word) t
+
+  (* dtors *)
+  val to_int : ('digits, 'word) t -> int
+  val to_string : ('digits, 'word) t -> string
+
+  (* consts *)
   val zero : (digits, word) t
   val one : (digits, word) t
   val max_int : (digits, word) t
@@ -21,12 +27,8 @@ module type NUM = sig
   val skein_ks_parity : (digits, word) t
   val rotations_0 : (digits, word) t Types.Consts.t
   val rotations_1 : (digits, word) t Types.Consts.t
-
-  (* dtors *)
-  val to_int : ('digits, 'word) t -> int
-  val to_string : ('digits, 'word) t -> string
-
   val digits : int
+
   val equal : ('digits, 'word) t -> ('digits, 'word) t -> bool
   val succ : ('digits, 'word) t -> ('digits, 'word) t
   val pred : ('digits, 'word) t -> ('digits, 'word) t
@@ -45,13 +47,13 @@ module Num_uint32_2 = struct
 
   let of_int = U.of_int
   let of_string = U.of_string
-  let zero = of_int 0
-  let one = of_int 1
-  let max_int = U.max_int
 
   let to_int = U.to_int
   let to_string = U.to_string
 
+  let zero = of_int 0
+  let one = of_int 1
+  let max_int = U.max_int
   let digits = 2
   let equal = U.equal
   let succ = U.succ
@@ -126,20 +128,14 @@ module Num_uint64_2 = struct
   module U = Unsigned.UInt64
 
   let of_int = U.of_int
-  let to_int = U.to_int
-
   let of_string = U.of_string
+
+  let to_int = U.to_int
   let to_string = U.to_string
 
-  let of_int = U.of_int
-  let of_string = U.of_string
   let zero = of_int 0
   let one = of_int 1
   let max_int = U.max_int
-
-  let to_int = U.to_int
-  let to_string = U.to_string
-
   let digits = 2
   let equal = U.equal
   let succ = U.succ
@@ -500,6 +496,8 @@ end
 
 
 let default_rounds = 20
+let default_upper = Unsigned.UInt32.(shift_left one 30 |> to_int)
+let default_upper_float = float_of_int default_upper
 
 module type CTR = sig
   type t
@@ -509,6 +507,8 @@ module type CTR = sig
   val to_string_array :  t -> string array
   val succ :  t ->  t
   val rand : ?rounds:int -> key:t -> ctr:t -> unit -> t
+  val uniform : ?upper:int -> ?rounds:int -> key:t -> ctr:t -> unit -> int array
+  val uniform01 : ?rounds:int -> key:t -> ctr:t -> unit -> float array
 end
 
 module Make_threefry (Num:NUM) (Rng:RNG with type digits = Num.digits) : CTR = struct
@@ -536,6 +536,32 @@ module Make_threefry (Num:NUM) (Rng:RNG with type digits = Num.digits) : CTR = s
 
   let rand ?(rounds=default_rounds) ~key ~ctr () =
     T.rand_R ~of_int:Num.of_int ~rounds ~key ~ctr
+
+  let limit n = Num.(sub max_int (rem max_int n))
+
+  let unbiased ~key ~ctr upper r =
+    let u = Num.of_int upper in
+    try
+      (* find first rand less than limit
+       * and do the remainder with that number
+       * error if no number is found *)
+      Array.to_list r
+      |> List.filter (fun x -> x <= limit u)
+      |> List.map (fun x -> Num.rem x u)
+      |> Array.of_list
+    with
+    | Invalid_argument _ ->
+      let to_str ctr = Printf.sprintf "{%s}" @@ String.concat "," (Array.to_list @@ to_string_array ctr) in
+      let () = Logs.warn (fun m -> m "Bad key/ctr pair ( %s / %s) for given ~upper:%d" (to_str key) (to_str ctr) upper) in
+      [||]
+
+  let uniform ?(upper=default_upper) ?(rounds=default_rounds) ~key ~ctr () =
+    unbiased ~key ~ctr upper @@ rand ~rounds ~key ~ctr () |> to_int_array
+
+  let uniform01 ?(rounds=default_rounds) ~key ~ctr () =
+    let arr = unbiased ~key ~ctr default_upper @@ rand ~rounds ~key ~ctr () in
+    Array.map (fun x -> let f = Num.to_int x |> float_of_int in f /. default_upper_float) arr
+
 end
 
 module Threefry_2_32 = Make_threefry (Num_uint32_2) (Make_threefry_2_XX)
