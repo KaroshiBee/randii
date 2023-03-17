@@ -20,11 +20,21 @@ let info ~doc name =
 
 let process rng_name_arg key_arg ctr_arg n_arg kind_arg () =
   let (let*) = Result.bind in
-  let kind = Option.(map (fun upper -> R.Uniform upper) kind_arg |> value ~default:R.Rand) in
+  let kind = match kind_arg with
+    | ("rand", None) -> R.Rand
+    | ("uniform01", None) -> R.Uniform01
+    | ("uniform", Some upper) -> R.Uniform upper
+    | _ -> R.Rand
+  in
   let n = max n_arg 1 in
 
-  let () = Logs.info (fun m -> m "%d draws of '%s.%s' rng" n rng_name_arg
-                         (match kind with Rand -> "rand" | Uniform i -> "uniform "^(string_of_int i))) in
+  let () = Logs.info (fun m ->
+      m "%d draws of '%s.%s' rng" n rng_name_arg
+        (match kind with
+         | Rand -> "rand"
+         | Uniform01 -> "uniform01"
+         | Uniform i -> "uniform "^(string_of_int i)))
+  in
   let () = Logs.info (fun m -> m "command line key: [%s]" @@ String.concat "," key_arg) in
   let () = Logs.info (fun m -> m "command line ctr: [%s]" @@ String.concat "," ctr_arg) in
 
@@ -96,7 +106,7 @@ module Raw = struct
               $ Common.key_arg
               $ Common.ctr_arg
               $ Common.n_arg
-              $ const None
+              $ const ("rand", None)
               $ setup_log
       in
       ret t
@@ -127,7 +137,7 @@ module Uniform = struct
       "
     in
     Arg.(
-      value & opt (some int) (Some 10) & info ["upper"] ~doc ~docv:"INT"
+      value & opt (pair string (some int)) ("uniform", Some 10) & info ["upper"] ~doc ~docv:"INT"
     )
 
   let term (setup_log:unit Term.t) =
@@ -158,10 +168,43 @@ module Uniform = struct
 
 end
 
+
+module Uniform01 = struct
+  open Cmdliner
+
+  let term (setup_log:unit Term.t) =
+    Cmdliner.Term.(
+      let t = const process
+              $ Common.rng_name_arg
+              $ Common.key_arg
+              $ Common.ctr_arg
+              $ Common.n_arg
+              $ const ("uniform01", None)
+              $ setup_log
+      in
+      ret t
+    )
+
+  module Manpage = struct
+    let command_description =
+      "Generate uniform random floats between [0, 1]"
+
+    let description = [`S "DESCRIPTION"; `P command_description]
+
+    let man = description
+
+    let info = Cmdliner.Cmd.info ~doc:command_description ~man "uniform01"
+  end
+
+  let cmd setup_log = Cmdliner.Cmd.v Manpage.info @@ term setup_log
+
+end
+
 (* group together all cmd lines *)
 let commands = [
   Raw.cmd setup_log;
   Uniform.cmd setup_log;
+  Uniform01.cmd setup_log;
 ]
 
 let info =

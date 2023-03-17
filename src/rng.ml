@@ -5,6 +5,7 @@ module Threefry_4x64 = Threefry.Gen_4_64
 
 type kind =
     Rand
+  | Uniform01
   | Uniform of int
 
 module Word_size = struct
@@ -108,7 +109,9 @@ let gen ~rng_name_arg ?key_arg ?ctr_arg n kind =
         let* ctr = _convert ctr_arg of_string_array ~default:ctr2 in
         let arr = match kind with
           | Rand -> rand ~key ~ctr () |> to_string_array
-          | Uniform upper -> uniform ~upper ~key ~ctr () |> of_int_array |> to_string_array in
+          | Uniform01 -> uniform01 ~key ~ctr () |> Array.map string_of_float
+          | Uniform upper -> uniform ~upper ~key ~ctr () |> Array.map string_of_int
+        in
         Result.ok (arr, succ ctr |> to_string_array)
       )
     | Word_size.ThirtyTwo, Digits.Four, Algo.Threefry -> Threefry_4x32.(
@@ -116,7 +119,9 @@ let gen ~rng_name_arg ?key_arg ?ctr_arg n kind =
         let* ctr = _convert ctr_arg of_string_array ~default:ctr4 in
         let arr = match kind with
           | Rand -> rand ~key ~ctr () |> to_string_array
-          | Uniform upper -> uniform ~upper ~key ~ctr () |> of_int_array |> to_string_array in
+          | Uniform01 -> uniform01 ~key ~ctr () |> Array.map string_of_float
+          | Uniform upper -> uniform ~upper ~key ~ctr () |> Array.map string_of_int
+        in
         Result.ok (arr, succ ctr |> to_string_array)
       )
     | Word_size.SixtyFour, Digits.Two, Algo.Threefry -> Threefry_2x64.(
@@ -124,7 +129,9 @@ let gen ~rng_name_arg ?key_arg ?ctr_arg n kind =
         let* ctr = _convert ctr_arg of_string_array ~default:ctr2 in
         let arr = match kind with
           | Rand -> rand ~key ~ctr () |> to_string_array
-          | Uniform upper -> uniform ~upper ~key ~ctr () |> of_int_array |> to_string_array in
+          | Uniform01 -> uniform01 ~key ~ctr () |> Array.map string_of_float
+          | Uniform upper -> uniform ~upper ~key ~ctr () |> Array.map string_of_int
+        in
         Result.ok (arr, succ ctr |> to_string_array)
       )
     | Word_size.SixtyFour, Digits.Four, Algo.Threefry -> Threefry_4x64.(
@@ -132,7 +139,9 @@ let gen ~rng_name_arg ?key_arg ?ctr_arg n kind =
         let* ctr = _convert ctr_arg of_string_array ~default:ctr4 in
         let arr = match kind with
           | Rand -> rand ~key ~ctr () |> to_string_array
-          | Uniform upper -> uniform ~upper ~key ~ctr () |> of_int_array |> to_string_array in
+          | Uniform01 -> uniform01 ~key ~ctr () |> Array.map string_of_float
+          | Uniform upper -> uniform ~upper ~key ~ctr () |> Array.map string_of_int
+        in
         Result.ok (arr, succ ctr |> to_string_array)
       )
   in
