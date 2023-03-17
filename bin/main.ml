@@ -137,17 +137,18 @@ module Uniform = struct
       "
     in
     Arg.(
-      value & opt (pair string (some int)) ("uniform", Some 10) & info ["upper"] ~doc ~docv:"INT"
+      value & opt int 10 & info ["upper"] ~doc ~docv:"INT"
     )
 
   let term (setup_log:unit Term.t) =
     Cmdliner.Term.(
+      let make_uniform = app (const (fun upper -> ("uniform", Some upper))) in
       let t = const process
               $ Common.rng_name_arg
               $ Common.key_arg
               $ Common.ctr_arg
               $ Common.n_arg
-              $ uniform_arg
+              $ make_uniform uniform_arg
               $ setup_log
       in
       ret t
