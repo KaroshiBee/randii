@@ -139,6 +139,17 @@ module Make
     let arr = unbiased ~key ~ctr default_upper @@ rand ~rounds ~key ~ctr () in
     Array.map (fun x -> let f = Num.to_int x |> float_of_int in f /. default_upper_float) arr
 
+  let draw_from
+      ~rand
+      ~uniform01
+      ~uniform
+      ~(key:t)
+      ~(ctr:t)
+    = function
+      | Rand -> rand ?rounds:None ~key ~ctr () |> to_string_array
+      | Uniform01 -> uniform01 ?rounds:None ~key ~ctr () |> Array.map string_of_float
+      | Uniform upper -> uniform ?upper:(Some upper) ?rounds:None ~key ~ctr () |> Array.map string_of_int
+
   let digits = Num.digits
 
   let num_equal_zero = Num.equal Num.zero

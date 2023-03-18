@@ -54,6 +54,10 @@ module type RNG_MAKER = sig
   end
 end
 
+type kind =
+    Rand
+  | Uniform01
+  | Uniform of int
 
 module type GEN = sig
   type t
@@ -61,11 +65,23 @@ module type GEN = sig
   val to_int_array :  t -> int array
   val of_string_array : string array ->  t
   val to_string_array :  t -> string array
+
   val succ :  t ->  t
   val pred :  t ->  t
+
   val rand : ?rounds:int -> key:t -> ctr:t -> unit -> t
   val uniform : ?upper:int -> ?rounds:int -> key:t -> ctr:t -> unit -> int array
   val uniform01 : ?rounds:int -> key:t -> ctr:t -> unit -> float array
+  val draw_from :
+    rand:(?rounds:int -> key:t -> ctr:t -> unit -> t) ->
+    uniform01:(?rounds:int -> key:t -> ctr:t -> unit -> float array) ->
+    uniform:(?upper:int -> ?rounds:int -> key:t -> ctr:t -> unit -> int array) ->
+    key:t ->
+    ctr:t ->
+    kind ->
+    string array
+
   val digits : int
   val is_zero : t -> bool
+
 end

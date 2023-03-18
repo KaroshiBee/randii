@@ -1,4 +1,4 @@
-module R = Cbrn.Rng
+module T = Cbrn.Types
 
 (* a generic setup for logging *)
 let setup_log =
@@ -21,10 +21,10 @@ let info ~doc name =
 let process rng_name_arg key_arg ctr_arg n_arg kind_arg () =
   let (let*) = Result.bind in
   let kind = match kind_arg with
-    | ("rand", None) -> R.Rand
-    | ("uniform01", None) -> R.Uniform01
-    | ("uniform", Some upper) -> R.Uniform upper
-    | _ -> R.Rand
+    | ("rand", None) -> T.Rand
+    | ("uniform01", None) -> T.Uniform01
+    | ("uniform", Some upper) -> T.Uniform upper
+    | _ -> T.Rand
   in
   let n = max n_arg 1 in
 
@@ -42,7 +42,7 @@ let process rng_name_arg key_arg ctr_arg n_arg kind_arg () =
   let ctr_arg = if List.length ctr_arg > 0 then Some (Array.of_list ctr_arg) else None in
 
   let p () =
-    let* arr = R.gen ~rng_name_arg ?key_arg ?ctr_arg n kind in
+    let* arr = Cbrn.Rng.gen ~rng_name_arg ?key_arg ?ctr_arg n kind in
     Result.ok (Array.iter (fun s -> Printf.printf "\n%s" s) arr; Printf.printf "\n")
   in
 
