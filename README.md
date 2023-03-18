@@ -33,3 +33,4 @@ WARNING it takes a while to run.
 ## TODOs
 
 - basic arithmetic for ctr_t type,
+- make dependence on testu01 a with-test dep
