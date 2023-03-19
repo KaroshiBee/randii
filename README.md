@@ -25,7 +25,7 @@ The test suite uses Known Answer Tests from the test suite of the
 There is also an executable for running the Threefry implementations through the SmallCrush battery of tests via OCaml [testu01](https://github.com/LesBoloss-es/ocaml-testu01/):
 
 ``` sh
-$ dune exec -- smallcrush
+$ dune exec -- u01/smallcrush.exe
 ```
 
 WARNING it takes a while to run.

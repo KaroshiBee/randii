@@ -1,6 +1,5 @@
 (executable
- (name main)
- (public_name smallcrush)
+ (name smallcrush)
  (libraries
    testu01
    utils
