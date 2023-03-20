@@ -13,13 +13,13 @@ with an additional dependency on [zarith](https://github.com/ocaml/Zarith) if on
 
 Two options, 
 
-1) via ```opam``` as usual:
+Option 1) via ```opam``` as usual:
 
 ```sh
 $ opam install randii
 ```
 
-2) checkout source code and build locally with dune:
+Option 2) checkout source code and build locally with dune:
 
 ```sh
 $ git clone https://github.com/KaroshiBee/randii.git
@@ -46,7 +46,8 @@ The test suite uses Known Answer Tests from the test suite of the
 There is a simple CLI tool for basic visual testing/playing: 
 
 ```sh
-# generate 12 uniforms between [0, 100] with Threefry 4 digit 32 bit RNG, with the default key and starting at ctr={1,2,3,4}
+# generate 12 uniforms between [0, 100] with Threefry 4 digit 32 bit RNG, 
+# with the default key and starting at ctr={1,2,3,4}
 $ randii uniform --upper=100 --rng=threefry4x32 -n 12 -c 1 -c 2 -c 3 -c 4
 
 19
